@@ -14,7 +14,7 @@ def crop_image_into_tiles(image, output_folder):
         image_path (str): The path to the input image.
         output_folder (str): The folder to save the cropped tiles.
     """
-    img= image
+    img= None
     if isinstance(image, Image.Image):
         img = image
 
