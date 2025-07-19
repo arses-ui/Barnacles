@@ -1,8 +1,10 @@
 from PIL import Image
 import base64
 import os 
+import requests
+import io
 
-def crop_image_into_tiles(image_path, output_folder):
+def crop_image_into_tiles(image, output_folder):
    
     """
 
@@ -12,16 +14,37 @@ def crop_image_into_tiles(image_path, output_folder):
         image_path (str): The path to the input image.
         output_folder (str): The folder to save the cropped tiles.
     """
-    try:
-        img = Image.open(image_path)
+    img= image
+    if isinstance(image, Image.Image):
+        img = image
 
-    except FileNotFoundError:
-        print(f"Error: Image not found at {image_path}")
-        return
+    elif isinstance(image, str): 
+
+        #check of online URL
+        if image.startswith("http://") or image.startswith("https://"):
+
+            try:
+                response = requests.get(image)
+                response.raise_for_status() # Raise an exception for HTTP errors
+                img = Image.open(io.BytesIO(response.content))
+
+            except requests.exceptions.RequestException as e:
+                print(f"Error downloading image from URL: {e}")
+                return  # Return None on failure
+            except Exception as e:
+                print(f"Error processing downloaded image: {e}")
+                return  # Return None on failure
+        else:
+            # It's a local file path
+            try:
+                img = Image.open(image)
+            except FileNotFoundError:
+                print(f"Error: Image not found at {image}")
+                return
 
     img_width, img_height = img.size
     tile_width, tile_height = img_width//16, img_height//16
-    tile_num = 0
+    tile_num = 0  
 
     for i in range(0, img_height, tile_height):
         for j in range(0, img_width, tile_width):
@@ -46,5 +69,8 @@ def directory_size(directory_path):
     print(f"Number of files in '{directory_path}': {num_files}")
     return num_files
 
+def clear_directory(directory):
 
-
+    file_list = [f for f in os.listdir(directory)]
+    for f in file_list: 
+        os.remove(os.path.join(directory, f))

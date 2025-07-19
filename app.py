@@ -14,7 +14,7 @@ def intro():
     st.sidebar.success("Select the project you want to chekck out")
 
     st.markdown("""
-        This is my project for DALI LAB. While the task was to create a single automation 
+        This is my project for DALI LAB. applications While the task was to create a single automation 
         technique, I went ahead and tried to approach the problem in three different ways. In this 
         web app, I present all three of my different approaches. You can select which one you want to 
         check out below!!!
@@ -25,12 +25,30 @@ def intro():
 
                 """)
 
+    st.markdown("""
+    <style>
+    div.stButton > button:first-child {
+        background-color: #007bff; /* Blue */
+        color: white;
+        border-radius: 5px;
+        border: none;
+        padding: 10px 20px;
+        font-size: 16px;
+    }
+    div.stButton > button:hover {
+        background-color: #0056b3; /* Darker blue on hover */
+    }
+    </style>
+    """, unsafe_allow_html=True)
+
 def API_call(): 
     import streamlit as st 
     import time
     import numpy as np
     import base64
     from PIL import Image
+    import tempfile 
+    import shutil 
 
 
     #bckground picture
@@ -95,66 +113,167 @@ def API_call():
     )
 
     #Displaying two widgets for inputting image or image URL
-    
+    img_file_buffer=None
+    image_url_input= ""
     col1, col2 = st.columns(2)
     with col1: 
-        img_file_buffer = st.file_uploader('Upload a PNG image', type='png')
-        if img_file_buffer is not None:
-            image = Image.open(img_file_buffer)
-            img_array = np.array(image)
+        img_file_buffer = st.file_uploader('Upload an image', type=['png', 'jpg', 'jpeg'])
     with col2: 
         input_path = st.text_input("Entire the Image URL here")
-
- 
- 
     
-    
-    @st.cache_data
-    def input_data(input):
+    output_directory = tempfile.mkdtemp()
 
 
-        output_directory  = "C:/Users/arses/Desktop/Cropped_images"
+    def crop_image_into_tiles(pil_image_object, output_folder):
+        """
+        Crops a PIL Image into a collection of smaller images (tiles) and saves them.
+        Assumes pil_image_object is ALREADY a valid PIL.Image.Image object.
+        """
+        if not isinstance(pil_image_object, Image.Image):
+            print(f"Error: Expected PIL.Image.Image, but got {type(pil_image_object)}")
+            return None # Indicate failure if input type is wrong
 
-        try : 
-            os.mkdir(output_directory)
-            st.badge(f"Directory '{output_directory}' created successfully.", icon=":material/check:", color="green" )
+        # Ensure output folder exists
+        try:
+            os.makedirs(output_folder, exist_ok=True)
+        except PermissionError:
+            print(f"Permission denied: Unable to create or access '{output_folder}'.")
+            return None
+        except Exception as e:
+            print(f"An unexpected error occurred creating directory: {e}")
+            return None
 
-        #Already created this file
-        except FileExistsError: 
-            st.badge(f"Directory '{output_directory}' already exists.",  icon=":material/thumb_up:")
+        img_width, img_height = pil_image_object.size
+        tile_width = img_width // 16
+        tile_height = img_height // 16
+        tile_num = 0
 
-        #Check access and permissions settings 
-        except PermissionError: 
-            st.markdown(":orange-badge[⚠️Permission denied: Unable to create '{output_directory}.]")
+        if tile_width == 0 or tile_height == 0:
+            print(f"Warning: Image {img_width}x{img_height} is too small for 1/16 tiling. No tiles will be generated.")
+            return 0
 
-        #Any other type of errors 
-        except Exception as e: 
-            st.markdown(f":orange-badge[⚠️ An error occured:{e}.]")
+        for i in range(0, img_height, tile_height):
+            for j in range(0, img_width, tile_width):
+                right = min(j + tile_width, img_width)
+                bottom = min(i + tile_height, img_height)
+                box = (j, i, right, bottom)
+                cropped_img = pil_image_object.crop(box)
+                cropped_img.save(os.path.join(output_folder, f"tile_{tile_num}.png")) # Use os.path.join
+                tile_num += 1
+
+        print(f"Image cropped successfully. Generated {tile_num} tiles in {output_folder}")
+        return tile_num
 
 
+    @st.cache_data(show_spinner=False) # Underscore for _image_for_processing not needed if it's hashable
+    def run_barnacle_analysis(image_for_processing_bytes_or_url): # This argument must be hashable
+        """
+        Performs the full barnacle analysis pipeline:
+        1. Converts input (bytes or URL) to PIL Image.
+        2. Crops the image into tiles and saves them.
+        3. Runs inference on each tile using the Roboflow client.
+        Returns total barnacles detected and a status message.
+        """
 
-        crop_image_into_tiles(input,output_directory)
+        # 1. Conert hashable input (bytes or URL) into a PIL Image object
+        pil_image_to_process = None
+        if isinstance(image_for_processing_bytes_or_url, bytes):
+            # It's bytes from an uploaded file
+            try:
+                pil_image_to_process = Image.open(io.BytesIO(image_for_processing_bytes_or_url))
+            except Exception as e:
+                st.warn(f"Error opening bytes as PIL image: {e}")
+                return None, f"Image conversion error: {e}"
+            
+        elif isinstance(image_for_processing_bytes_or_url, str):
+            # It's a URL string
+            try:
+                response = requests.get(image_for_processing_bytes_or_url)
+                response.raise_for_status()
+                pil_image_to_process = Image.open(io.BytesIO(response.content))
+            except requests.exceptions.RequestException as e:
+                print(f"Error downloading image from URL: {e}")
+                return None, f"Download error: {e}"
+            except Exception as e:
+                print(f"Error processing URL content: {e}")
+                return None, f"URL image process error: {e}"
+            
+        else:
+            # Should not happen if input preparation logic is correct
+            st.warn(f"Unhandled input type for cached function: {type(image_for_processing_bytes_or_url)}")
+            return None, "Invalid input type for analysis."
 
-        number_of_barnacles= 0
-        number_of_images= directory_size(output_directory)
+        if pil_image_to_process is None:
+            return 0, "Failed to load image for processing."
 
-        #Progress
-        progress_text = "Operation in progress. Hold on tight!"
-        my_bar = st.progress(0, text= progress_text)
+        # 2. Perform the cropping (tiles are saved to output_directory)
+        tiles_count = crop_image_into_tiles(pil_image_to_process, output_directory) 
+
+        if tiles_count is None or tiles_count == 0:
+            return 0, "No tiles generated or cropping failed."
+
+        # 3. Barnacle Inference Loop
+        number_of_barnacles = 0
+        number_of_images = tiles_count
+
         for i in range(number_of_images):
-
             with CLIENT.use_configuration(custom_configuration):
-                result = CLIENT.infer(f"{output_directory}/tile_{i}.png", model_id = "barnacles-lnd34/1")
-            number_of_barnacles+= len(result['predictions'])
-            my_bar.progress(i + 1/(number_of_images), text= progress_text)
+                image_tile_path = os.path.join(output_directory, f"tile_{i}.png")
+                if not os.path.exists(image_tile_path):
+                    print(f"Warning: Tile {image_tile_path} not found for inference.")
+                    continue
 
-        time.sleep(1)
-        my_bar.empty() 
-        st.badge(f"The number of barnacles present in the image is: {number_of_barnacles}")
+                try:
+                    result = CLIENT.infer(image_tile_path, model_id="barnacles-lnd34/1")
+                    number_of_barnacles += len(result['predictions'])
+                except Exception as e:
+                    print(f"Error during inference for tile {i}: {e}")
+                    continue
+
+        return number_of_barnacles, "Success"
+
+
+    #Trigger for the Analysis to start 
+    analysis_triggered = st.button("Start Barnacle Analysis")
+    if analysis_triggered:
+        # Prepare the input for the cached function to be hashable
+        hashable_input = None
+
+        if img_file_buffer is not None:
+            # Read the bytes from the UploadedFile. This makes it hashable.
+            # Use seek(0) to ensure the buffer is read from the beginning
+            # in case it was already read (e.g., by st.image above).
+            img_file_buffer.seek(0)
+            hashable_input = img_file_buffer.read()
+
+
+        elif image_url_input:
+            # URL string is already hashable
+            hashable_input = image_url_input
+
+        if hashable_input is None:
+            st.warning("Please upload an image or provide a valid image URL to proceed.")
+
+        else:
+            with st.spinner("Running analysis... This might take a moment."):
+                total_barnacles, status = run_barnacle_analysis(hashable_input)
+
+            if status == "Success":
+                st.metric("Total Barnacles Detected", value=total_barnacles)
+                st.info("Analysis complete!")
+            else:
+                st.error(f"Analysis failed: {status}")
+                st.warning(f"Please check the input image/URL. Reason: {status}")
+
+    try: 
+        shutil.rmtree(output_directory)
+    except Exception as e: 
+        st.warning(f"Error cleaning up the temporary directory: {e}")
 
 
 
 
+        
 
 
 page_names_to_funcs= {
