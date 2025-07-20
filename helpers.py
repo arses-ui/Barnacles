@@ -43,7 +43,7 @@ def crop_image_into_tiles(image, output_folder):
                 return
 
     img_width, img_height = img.size
-    tile_width, tile_height = img_width//16, img_height//16
+    tile_width, tile_height = img_width//5, img_height//5
     tile_num = 0  
 
     for i in range(0, img_height, tile_height):
