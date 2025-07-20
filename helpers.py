@@ -74,3 +74,20 @@ def clear_directory(directory):
     file_list = [f for f in os.listdir(directory)]
     for f in file_list: 
         os.remove(os.path.join(directory, f))
+
+
+
+def remove_files_from_directory(directory_path): 
+    """
+    Removes all files within a specified directory. 
+    Subdirectories and ther contens are not affected.
+    """
+
+    try: 
+        for filename in os.listdir(directory_path): 
+            file_path = os.path.join(directory_path, filename)
+            if os.path.isfile(file_path): 
+                os.remove(file_path)
+                print(f"Removed : {file_path}")
+    except OSError as e: 
+        print(f"Errror:{e}")
