@@ -2,7 +2,7 @@ from inference_sdk import InferenceHTTPClient, InferenceConfiguration
 import streamlit as st 
 import pandas as pd 
 import numpy as np 
-from helpers import *
+from scripts.helpers import *
 import os 
 
 DATE_COLUMN = 'date/time'
@@ -124,26 +124,6 @@ def intro():
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 def Trained_model(): 
 
     import streamlit as st 
@@ -155,38 +135,107 @@ def Trained_model():
     import shutil 
 
 
-    input_style = """
+
+
+
+     #function to change the background color 
+    def set_bg_url():
+        '''
+        A function to unpack an image from url and set as bg.
+        Returns
+        -------
+        The background.
+        '''
+            
+        st.markdown(
+            f"""
+            <style>
+            .stApp {{
+                background: url("https://upload.wikimedia.org/wikipedia/commons/thumb/7/72/Chthamalus_stellatus.jpg/2560px-Chthamalus_stellatus.jpg");
+                background-size: cover
+            }}
+            </style>
+            """,
+            unsafe_allow_html=True
+        )
+    
+    set_bg_url()
+
+
+
+    st.markdown("""
     <style>
-    input[type="text"] {
-        background-color: transparent;
-        color: #a19eae;  // This changes the text color inside the input box
+    /* Existing button styles */
+    div.stButton > button:first-child {
+        background-color: #007bff; /* Blue */
+        color: white;
+        border-radius: 5px;
+        border: none;
+        padding: 10px 20px;
+        font-size: 16px;
     }
-    div[data-baseweb="base-input"] {
-        background-color: black !important;
+    div.stButton > button:hover {
+        background-color: #0056b3; /* Darker blue on hover */
     }
-    [data-testid="stAppViewContainer"] {
-        background-color: transparent !important;
+
+    /* New Bounding Box Style */
+    .bounding-box {
+        border: 2px solid #4CAF50; /* Green border */
+        border-radius: 10px; /* Rounded corners */
+        padding: 20px; /* Space inside the box */
+        margin-bottom: 20px; /* Space below the box */
+        background-color: #f0fff0; /* Light green background */
+        box-shadow: 3px 3px 8px rgba(0, 0, 0, 0.1); /* Subtle shadow */
     }
+
+    /* Style for text inside the bounding box, if desired */
+    .bounding-box p {
+        font-size: 1.1em;
+        line-height: 1.6;
+        color: #333;
+    }
+
     </style>
-    """
-    st.markdown(input_style, unsafe_allow_html=True)
+    """, unsafe_allow_html=True) 
+    st.markdown(f"""
+    <div class="bounding-box">
+        <p>
+        In this page, I try to solve the problem with the assistance of two tools. First is a YOLO model that had been pre-trained on 
+        detecting barnacles. Second is a YOLO11s model that I trained on my own using datasets I found in <a href="https://universe.roboflow.com/stephen-7b2qu/barnacles-lnd34/model/1" target="_blank">Roboflow Universe.</a>
+    </p>
+
+       
+    </div>
+    """, unsafe_allow_html=True)
+
+
+    st.markdown(f"""
+    <div class="bounding-box">
+                <p>
+    However, I ran into a problem. The pre-trained model I call using an API call is trained on dataset consisting of only a few barnacles
+        per image. As a result, it did not perform great for images with large number of barnacles. Similarly, the the dataset I trained 
+        to used to train my own model also contained a relatively small number of barnacles per image. As a result, I take an extra step in my 
+        my approach, and break the image down into approximately 30 smaller images, and perform inference on all the images individually. 
+                </p>
+                </div>  
+        """, unsafe_allow_html=True)
+    
+
+    st.markdown(f"""
+    <div class="bounding-box">
+         <span style="color:black"> 
+        <h3>Want to learn more about the challenge or the project? </h3>
+        <p>
+            <li>Check out the code in my <a href="https://github.com/arses-ui/Barnacles.git" target="_blank">Github Repository</a></li>
+            <li>Also check out the <a href="https://dalilab.notion.site/Data-Challenge-2b3ecf13c9e14ce18932c95b095519a3">DALI Challenge!</a></li>
+        </p></span>     
+    </div>
+    """, unsafe_allow_html=True)
+
+    
 
     st.markdown(f"# {list(page_names_to_funcs.keys())[1]}")
-    st.markdown(
-        """
-        This was the quickest approach. Through the [Roboflow Universe](https://universe.roboflow.com/stephen-7b2qu/barnacles-lnd34/model/1), I 
-        came across a YOLO model that had been trained to detect Barnacles on a dataset of 255 images. Utilizing this model's API, feed infer the 
-        number of Barnacles on our image.\
-        
-
-        However, there is a twist. Upon playing around with the model, 
-        I discovered that the model only accurately detects Barnacles when there is a few nnumber of them on the scren as that is the type of dataset it was trained on. 
-        Utilizing this fact, I take an extra step.\
-        
-
-        I divide the image into smaller 'tiles' (256+) and make the model individual run inference through every single one of them. While less efficient, it was much more accurate (~80%) while only taking few minutes to run.
-
-""")
+    
     # Initializing my API Client
     custom_configuration= InferenceConfiguration(confidence_threshold=0.3)
     CLIENT= InferenceHTTPClient(
@@ -444,9 +493,9 @@ def Computer_vision():
     st.markdown(f"""
     <div class="bounding-box">
          <span style="color:black"> 
-        <h3>Want to learn how I did this or see my code? </h3>
+        <h3>Want to learn more about the challenge or the project? </h3>
         <p>
-            <li>Check out my <a href="https://github.com/arses-ui/Barnacles.git" target="_blank">Github Repository</a></li>
+            <li>Check out the code in my <a href="https://github.com/arses-ui/Barnacles.git" target="_blank">Github Repository</a></li>
             <li>Also check out the <a href="https://dalilab.notion.site/Data-Challenge-2b3ecf13c9e14ce18932c95b095519a3">DALI Challenge!</a></li>
         </p></span>     
     </div>
@@ -566,9 +615,11 @@ def Computer_vision():
             coins.append(contours[0])
 
         # Draw the outline
-        image = cv2.drawContours(image_array, coins, -1, color=(0, 23, 223), thickness=2)
+        contour_image = cv2.drawContours(image_array, coins, -1, color=(0, 23, 223), thickness=2)
         plt.imshow(image, cmap ='grey')
-        return  len(coins), "Success"
+        return  len(coins), "Success", markers
+    
+
     
     #Trigger for the Analysis to start 
     analysis_triggered = st.button("Start Barnacle Analysis")
@@ -593,11 +644,13 @@ def Computer_vision():
 
         else:
             with st.spinner("Running analysis... This might take a moment."):
-                total_barnacles, status = image_processing(hashable_input)
+                total_barnacles, status, display_image = image_processing(hashable_input)
 
             if status == "Success":
                 st.metric("Total Barnacles Detected", value=total_barnacles)
                 st.success("Analysis complete!", icon="✅")
+                st.image(display_image, caption='Visualization of the barnacles')
+
             else:
                 st.error(f"Analysis failed: {status}")
                 st.warning(f"Please check the input image/URL. Reason: {status}")
