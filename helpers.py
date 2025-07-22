@@ -3,6 +3,7 @@ import base64
 import os 
 import requests
 import io
+import numpy as np 
 
 def crop_image_into_tiles(image, output_folder):
    
@@ -88,6 +89,7 @@ def remove_files_from_directory(directory_path):
             file_path = os.path.join(directory_path, filename)
             if os.path.isfile(file_path): 
                 os.remove(file_path)
-                print(f"Removed : {file_path}")
+        
     except OSError as e: 
         print(f"Errror:{e}")
+    
