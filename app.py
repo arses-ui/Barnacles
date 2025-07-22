@@ -9,6 +9,7 @@ DATE_COLUMN = 'date/time'
 
 def intro(): 
 
+    import streamlit as st
     
     def set_bg_url():
         '''
@@ -29,7 +30,7 @@ def intro():
             """,
             unsafe_allow_html=True
         )
-    import streamlit as st
+    
 
     st.markdown("""
     <style>
@@ -143,7 +144,7 @@ def intro():
 
 
 
-def API_call(): 
+def Trained_model(): 
 
     import streamlit as st 
     import time
@@ -256,7 +257,7 @@ def API_call():
         Returns total barnacles detected and a status message.
         """
 
-        # 1. Conert hashable input (bytes or URL) into a PIL Image object
+        # 1. Convert hashable input (bytes or URL) into a PIL Image object
         pil_image_to_process = None
         if isinstance(image_for_processing_bytes_or_url, bytes):
             # It's bytes from an uploaded file
@@ -357,9 +358,262 @@ def API_call():
         
 
 
+def Computer_vision(): 
+    import numpy as np
+    import cv2
+    from matplotlib import pyplot as plt 
+    from scipy.ndimage import gaussian_filter
+    import matplotlib.pyplot as plt
+    from PIL import Image
+    import matplotlib.image as mpimg
+    from IPython.display import  display
+    import tempfile 
+    import shutil
+    
+    #function to change the background color 
+    def set_bg_url():
+        '''
+        A function to unpack an image from url and set as bg.
+        Returns
+        -------
+        The background.
+        '''
+            
+        st.markdown(
+            f"""
+            <style>
+            .stApp {{
+                background: url("https://upload.wikimedia.org/wikipedia/commons/thumb/7/72/Chthamalus_stellatus.jpg/2560px-Chthamalus_stellatus.jpg");
+                background-size: cover
+            }}
+            </style>
+            """,
+            unsafe_allow_html=True
+        )
+    
+    set_bg_url()
+    
+    st.markdown("""
+    <style>
+    /* Existing button styles */
+    div.stButton > button:first-child {
+        background-color: #007bff; /* Blue */
+        color: white;
+        border-radius: 5px;
+        border: none;
+        padding: 10px 20px;
+        font-size: 16px;
+    }
+    div.stButton > button:hover {
+        background-color: #0056b3; /* Darker blue on hover */
+    }
+
+    /* New Bounding Box Style */
+    .bounding-box {
+        border: 2px solid #4CAF50; /* Green border */
+        border-radius: 10px; /* Rounded corners */
+        padding: 20px; /* Space inside the box */
+        margin-bottom: 20px; /* Space below the box */
+        background-color: #f0fff0; /* Light green background */
+        box-shadow: 3px 3px 8px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+    }
+
+    /* Style for text inside the bounding box, if desired */
+    .bounding-box p {
+        font-size: 1.1em;
+        line-height: 1.6;
+        color: #333;
+    }
+
+    </style>
+    """, unsafe_allow_html=True) 
+  
+    st.markdown(f"# {list(page_names_to_funcs.keys())[2]}")
+    st.markdown(f"""
+    <div class="bounding-box">
+        <p>
+        In this page, I present my second approach to tackle the provided challenge. In all honestly, one of the main reasons I chose this
+        approach was purely just to traditional computer vision image-processing techniques. To describe it briefly, I sequentlly perform 
+        different transformations and processing techniques, namely filtering, binarization, Morphological Transformations and Contouring. I use popular methods like 
+        Otsu' method for thresholding and Watershed Algorithm for image segmentation. Finally, by keeping track of the total different contour objects, 
+        I count the number of barnacles in the given image. 
+        </p>
+    </div>
+    """, unsafe_allow_html=True)
+
+    st.markdown(f"""
+    <div class="bounding-box">
+         <span style="color:black"> 
+        <h3>Want to learn how I did this or see my code? </h3>
+        <p>
+            <li>Check out my <a href="https://github.com/arses-ui/Barnacles.git" target="_blank">Github Repository</a></li>
+            <li>Also check out the <a href="https://dalilab.notion.site/Data-Challenge-2b3ecf13c9e14ce18932c95b095519a3">DALI Challenge!</a></li>
+        </p></span>     
+    </div>
+    """, unsafe_allow_html=True)
+
+
+    custom_css = """
+    <style>
+    div[data-testid="stFileUploader"]>section[data-testid="stFileUploadDropzone"]>button[data-testid="baseButton-secondary"] {
+        background-color: #4CAF50; /* Green */
+        color: white;
+    }
+    </style>
+    """
+    st.markdown(custom_css, unsafe_allow_html=True)
+    col1, col2 = st.columns(2)
+    
+    img_file_buffer=None
+    image_url_input= ""
+    with col1: 
+        img_file_buffer = st.file_uploader('Upload an image', type=['png', 'jpg', 'jpeg'])
+    with col2:    
+        input_path = st.text_input("Entire the Image URL here")
+    
+    output_directory = tempfile.mkdtemp()
+
+    @st.cache_data(show_spinner=False) 
+    def image_processing(image_for_processing_bytes_or_url, THRESHOLD=0.27): 
+        # 1. Conert hashable input (bytes or URL) into a PIL Image object
+        pil_image_to_process = None
+        if isinstance(image_for_processing_bytes_or_url, bytes):
+            # It's bytes from an uploaded file
+            try:
+                pil_image_to_process = Image.open(io.BytesIO(image_for_processing_bytes_or_url))
+            except Exception as e:
+                st.warn(f"Error opening bytes as PIL image: {e}")
+                return None, f"Image conversion error: {e}"
+            
+        elif isinstance(image_for_processing_bytes_or_url, str):
+            # It's a URL string
+            try:
+                response = requests.get(image_for_processing_bytes_or_url)
+                response.raise_for_status()
+                pil_image_to_process = Image.open(io.BytesIO(response.content))
+            except requests.exceptions.RequestException as e:
+                print(f"Error downloading image from URL: {e}")
+                return None, f"Download error: {e}"
+            except Exception as e:
+                print(f"Error processing URL content: {e}")
+                return None, f"URL image process error: {e}"
+            
+        else:
+            # Should not happen if input preparation logic is correct
+            st.warn(f"Unhandled input type for cached function: {type(image_for_processing_bytes_or_url)}")
+            return None, "Invalid input type for analysis."
+
+        if pil_image_to_process is None:
+            return 0, "Failed to load image for processing."
+
+        image = pil_image_to_process.convert("RGB")
+        grayscale_image = image.convert("L")
+        image_array = np.array(grayscale_image)
+        gaussian_filtered_image = gaussian_filter(image_array, sigma=1)
+
+        otsu_threshold, image_after_otsu = cv2.threshold(
+        gaussian_filtered_image, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU, 
+        )
+        
+        # noise removal
+        kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (3, 3))
+        cleaned_image = cv2.morphologyEx(image_after_otsu, 
+                                cv2.MORPH_OPEN,
+                                kernel,
+                                iterations=1)
+        
+
+        # sure background area
+        intermediary_bg = cv2.dilate(cleaned_image, kernel, iterations=3)
+        sure_bg = cv2.dilate(intermediary_bg, kernel, iterations=3)
+
+        # Distance transform
+        dist = cv2.distanceTransform(cleaned_image, cv2.DIST_L2,5)
+
+        # foreground area
+        ret, sure_fg = cv2.threshold(dist, THRESHOLD * dist.max(), 255, cv2.THRESH_BINARY)
+        sure_fg = sure_fg.astype(np.uint8)
+    
+        # unknown area
+        unknown = cv2.subtract(sure_bg, sure_fg)
+
+        # Marker labelling
+        # sure foreground 
+        ret, markers = cv2.connectedComponents(sure_fg)
+
+        # Add one to all labels so that background is not 0, but 1
+        markers += 1
+        # mark the region of unknown with zero
+        markers[unknown == 255] = 0
+
+        # watershed Algorithm
+        img_array = np.array(image).astype(np.uint8)
+        markers = cv2.watershed(img_array, markers)
+
+
+        labels = np.unique(markers)
+        coins = []
+        for label in labels[2:]:  
+
+        # Create a binary image in which only the area of the label is in the foreground 
+        #and the rest of the image is in the background   
+            target = np.where(markers == label, 255, 0).astype(np.uint8)
+        
+        # Perform contour extraction on the created binary image
+            contours, hierarchy = cv2.findContours(
+                target, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE
+            )
+            coins.append(contours[0])
+
+        # Draw the outline
+        image = cv2.drawContours(image_array, coins, -1, color=(0, 23, 223), thickness=2)
+        plt.imshow(image, cmap ='grey')
+        return  len(coins), "Success"
+    
+    #Trigger for the Analysis to start 
+    analysis_triggered = st.button("Start Barnacle Analysis")
+    if analysis_triggered:
+        # Prepare the input for the cached function to be hashable
+        hashable_input = None
+
+        if img_file_buffer is not None:
+            # Read the bytes from the UploadedFile. This makes it hashable.
+            # Use seek(0) to ensure the buffer is read from the beginning
+            # in case it was already read (e.g., by st.image above).
+            img_file_buffer.seek(0)
+            hashable_input = img_file_buffer.read()
+
+
+        elif image_url_input:
+            # URL string is already hashable
+            hashable_input = image_url_input
+
+        if hashable_input is None:
+            st.warning("Please upload an image or provide a valid image URL to proceed.")
+
+        else:
+            with st.spinner("Running analysis... This might take a moment."):
+                total_barnacles, status = image_processing(hashable_input)
+
+            if status == "Success":
+                st.metric("Total Barnacles Detected", value=total_barnacles)
+                st.success("Analysis complete!", icon="✅")
+            else:
+                st.error(f"Analysis failed: {status}")
+                st.warning(f"Please check the input image/URL. Reason: {status}")
+
+    try: 
+        shutil.rmtree(output_directory)
+    except Exception as e: 
+        st.warning(f"Error cleaning up the temporary directory: {e}")
+
+
+
+
 page_names_to_funcs= {
 "-":intro, 
-"Project 1: API call": API_call
+"Approach 1: Training model": Trained_model, 
+"Approach 2: Traditional CV": Computer_vision
 }
 
 project_name = st.sidebar.selectbox("Choose a project", page_names_to_funcs.keys())
