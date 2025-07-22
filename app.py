@@ -11,6 +11,8 @@ def intro():
 
     import streamlit as st
     
+    st.set_page_config(page_icon = '👋')
+    
     def set_bg_url():
         '''
         A function to unpack an image from url and set as bg.
@@ -67,7 +69,7 @@ def intro():
     </style>
     """, unsafe_allow_html=True) 
 
-    DATE_COLUMN = 'date/time'
+
     st.markdown("""<div class="bounding-box">
                 <span style="color:black"> 
             <h1>Welcome to my project!
@@ -76,15 +78,13 @@ def intro():
                 </div>
         """, unsafe_allow_html=True)
     
-    st.sidebar.success("Select the project you want to chekck out")
+    st.sidebar.success("Select the project you want to check out")
         
     st.markdown(f"""
     <div class="bounding-box">
         <p>
-        This is my project for DALI LAB. applications. While the task was to create a single automation
-        technique, I went ahead and tried to approach the problem in three different ways. In this
-        web app, I present all three of my different approaches. You can select which one you want to
-        check using the side-bar!!!
+        As part of my DALI Lab application, I built this project to tackle the challenge of counting large numbers of barnacles. I approached the problem using three different techniques, both to explore the most optimal solution and to expand my understanding of computer vision. 
+            All three methods are available in this interactive web app. Use the sidebar to explore and compare them!
         </p>
     </div>
     """, unsafe_allow_html=True)
@@ -93,13 +93,16 @@ def intro():
     st.markdown(f"""
     <div class="bounding-box">
          <span style="color:black"> 
-        <h3>Want to reach out for suggestions or provide feedback?</h3>
+        <h3>Want to reach out or learn more about the project/challenge?</h3>
         <p>
-            <li>Check out my <a href="https://github.com/arses-ui" target="_blank">GitHub</a></li>
+            <li>Check out the code in my <a href="https://github.com/arses-ui/Barnacles.git" target="_blank">Github Repository</a></li>
+            <li>Chheck out the DALI Challenge <a href="https://dalilab.notion.site/Data-Challenge-2b3ecf13c9e14ce18932c95b095519a3">here!</a></li>
             <li>Send me a message through email: <a href="mailto:arses.prasai.28@dartmouth.edu">arses.prasai.28@dartmouth.edu</a></li>
         </p></span>     
     </div>
     """, unsafe_allow_html=True)
+
+
 
 
     st.markdown("""
@@ -161,7 +164,7 @@ def Trained_model():
     
     set_bg_url()
 
-
+    
 
     st.markdown("""
     <style>
@@ -197,6 +200,17 @@ def Trained_model():
 
     </style>
     """, unsafe_allow_html=True) 
+
+
+    st.markdown("""<div class="bounding-box">
+                <span style="color:black"> 
+            <h1>Deep Learning Models
+                </h1>
+                </span>
+                </div>
+        """, unsafe_allow_html=True)
+    
+
     st.markdown(f"""
     <div class="bounding-box">
         <p>
@@ -220,21 +234,6 @@ def Trained_model():
                 </div>  
         """, unsafe_allow_html=True)
     
-
-    st.markdown(f"""
-    <div class="bounding-box">
-         <span style="color:black"> 
-        <h3>Want to learn more about the challenge or the project? </h3>
-        <p>
-            <li>Check out the code in my <a href="https://github.com/arses-ui/Barnacles.git" target="_blank">Github Repository</a></li>
-            <li>Also check out the <a href="https://dalilab.notion.site/Data-Challenge-2b3ecf13c9e14ce18932c95b095519a3">DALI Challenge!</a></li>
-        </p></span>     
-    </div>
-    """, unsafe_allow_html=True)
-
-    
-
-    st.markdown(f"# {list(page_names_to_funcs.keys())[1]}")
     
     # Initializing my API Client
     custom_configuration= InferenceConfiguration(confidence_threshold=0.3)
@@ -476,8 +475,15 @@ def Computer_vision():
 
     </style>
     """, unsafe_allow_html=True) 
+
+    st.markdown("""<div class="bounding-box">
+                <span style="color:black"> 
+            <h1>Traditional Computer Vision 
+                </h1>
+                </span>
+                </div>
+        """, unsafe_allow_html=True)
   
-    st.markdown(f"# {list(page_names_to_funcs.keys())[2]}")
     st.markdown(f"""
     <div class="bounding-box">
         <p>
@@ -489,18 +495,6 @@ def Computer_vision():
         </p>
     </div>
     """, unsafe_allow_html=True)
-
-    st.markdown(f"""
-    <div class="bounding-box">
-         <span style="color:black"> 
-        <h3>Want to learn more about the challenge or the project? </h3>
-        <p>
-            <li>Check out the code in my <a href="https://github.com/arses-ui/Barnacles.git" target="_blank">Github Repository</a></li>
-            <li>Also check out the <a href="https://dalilab.notion.site/Data-Challenge-2b3ecf13c9e14ce18932c95b095519a3">DALI Challenge!</a></li>
-        </p></span>     
-    </div>
-    """, unsafe_allow_html=True)
-
 
     custom_css = """
     <style>
