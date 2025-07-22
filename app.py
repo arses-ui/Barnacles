@@ -8,22 +8,98 @@ import os
 DATE_COLUMN = 'date/time'
 
 def intro(): 
+
+    
+    def set_bg_url():
+        '''
+        A function to unpack an image from url and set as bg.
+        Returns
+        -------
+        The background.
+        '''
+            
+        st.markdown(
+            f"""
+            <style>
+            .stApp {{
+                background: url("https://upload.wikimedia.org/wikipedia/commons/thumb/7/72/Chthamalus_stellatus.jpg/2560px-Chthamalus_stellatus.jpg");
+                background-size: cover
+            }}
+            </style>
+            """,
+            unsafe_allow_html=True
+        )
     import streamlit as st
-    DATE_COLUMN = 'date/time'
-    st.write("# Welcome to my Project.")
-    st.sidebar.success("Select the project you want to chekck out")
 
     st.markdown("""
-        This is my project for DALI LAB. applications While the task was to create a single automation 
-        technique, I went ahead and tried to approach the problem in three different ways. In this 
-        web app, I present all three of my different approaches. You can select which one you want to 
-        check out below!!!
-            
-        ### Want to reach out for suggestions or providefeedback? 
-        -Check out my [GitHub](https://github.com/arses-ui)\\
-        -Send me a message through email: arses.prasai.28@dartmouth.edu
+    <style>
+    /* Existing button styles */
+    div.stButton > button:first-child {
+        background-color: #007bff; /* Blue */
+        color: white;
+        border-radius: 5px;
+        border: none;
+        padding: 10px 20px;
+        font-size: 16px;
+    }
+    div.stButton > button:hover {
+        background-color: #0056b3; /* Darker blue on hover */
+    }
 
-                """)
+    /* New Bounding Box Style */
+    .bounding-box {
+        border: 2px solid #4CAF50; /* Green border */
+        border-radius: 10px; /* Rounded corners */
+        padding: 20px; /* Space inside the box */
+        margin-bottom: 20px; /* Space below the box */
+        background-color: #f0fff0; /* Light green background */
+        box-shadow: 3px 3px 8px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+    }
+
+    /* Style for text inside the bounding box, if desired */
+    .bounding-box p {
+        font-size: 1.1em;
+        line-height: 1.6;
+        color: #333;
+    }
+
+    </style>
+    """, unsafe_allow_html=True) 
+
+    DATE_COLUMN = 'date/time'
+    st.markdown("""<div class="bounding-box">
+                <span style="color:black"> 
+            <h1>Welcome to my project!
+                </h1>
+                </span>
+                </div>
+        """, unsafe_allow_html=True)
+    
+    st.sidebar.success("Select the project you want to chekck out")
+        
+    st.markdown(f"""
+    <div class="bounding-box">
+        <p>
+        This is my project for DALI LAB. applications. While the task was to create a single automation
+        technique, I went ahead and tried to approach the problem in three different ways. In this
+        web app, I present all three of my different approaches. You can select which one you want to
+        check using the side-bar!!!
+        </p>
+    </div>
+    """, unsafe_allow_html=True)
+
+
+    st.markdown(f"""
+    <div class="bounding-box">
+         <span style="color:black"> 
+        <h3>Want to reach out for suggestions or provide feedback?</h3>
+        <p>
+            <li>Check out my <a href="https://github.com/arses-ui" target="_blank">GitHub</a></li>
+            <li>Send me a message through email: <a href="mailto:arses.prasai.28@dartmouth.edu">arses.prasai.28@dartmouth.edu</a></li>
+        </p></span>     
+    </div>
+    """, unsafe_allow_html=True)
+
 
     st.markdown("""
     <style>
@@ -40,8 +116,35 @@ def intro():
     }
     </style>
     """, unsafe_allow_html=True)
+    set_bg_url()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 def API_call(): 
+
     import streamlit as st 
     import time
     import numpy as np
@@ -51,28 +154,6 @@ def API_call():
     import shutil 
 
 
-    #bckground picture
-
-    original_title = '<h1 style="font-family: serif; color:white; font-size: 20px'
-    st.markdown(original_title, unsafe_allow_html=True)
-
-
-    # Set the background image
-    background_image = """
-    <style>
-    [data-testid="stAppViewContainer"] > .main {
-        background-image: url("https://images.unsplash.com/photo-1542281286-9e0a16bb7366");
-        background-size: 100vw 100vh;  # This sets the size to cover 100% of the viewport width and height
-        background-position: center;  
-        background-repeat: no-repeat;
-    }
-    </style>
-    """
-
-    st.markdown(background_image, unsafe_allow_html=True)
-
-    st.text_input("", placeholder="Streamlit CSS ")
-
     input_style = """
     <style>
     input[type="text"] {
@@ -80,7 +161,7 @@ def API_call():
         color: #a19eae;  // This changes the text color inside the input box
     }
     div[data-baseweb="base-input"] {
-        background-color: transparent !important;
+        background-color: black !important;
     }
     [data-testid="stAppViewContainer"] {
         background-color: transparent !important;
