@@ -11,7 +11,7 @@ def intro():
 
     import streamlit as st
     
-    st.set_page_config(page_icon = '👋')
+    st.set_page_config(page_title= "Arses' Project", page_icon = '👋' )
     
     def set_bg_url():
         '''
@@ -25,7 +25,7 @@ def intro():
             f"""
             <style>
             .stApp {{
-                background: url("https://upload.wikimedia.org/wikipedia/commons/thumb/7/72/Chthamalus_stellatus.jpg/2560px-Chthamalus_stellatus.jpg");
+                background: url("https://images.pexels.com/photos/1166644/pexels-photo-1166644.jpeg?_gl=1*nzqsrx*_ga*MTk5NDcyOTMxMC4xNzUzMjM1MTcx*_ga_8JE65Q40S6*czE3NTMyMzUxNzEkbzEkZzEkdDE3NTMyMzUyNjEkajMwJGwwJGgw");
                 background-size: cover
             }}
             </style>
@@ -130,15 +130,13 @@ def intro():
 def Trained_model(): 
 
     import streamlit as st 
-    import time
-    import numpy as np
-    import base64
     from PIL import Image
     import tempfile 
     import shutil 
 
 
-
+    st.set_page_config(page_title= "Models", page_icon = '🖥️' )
+    
 
 
      #function to change the background color 
@@ -154,7 +152,7 @@ def Trained_model():
             f"""
             <style>
             .stApp {{
-                background: url("https://upload.wikimedia.org/wikipedia/commons/thumb/7/72/Chthamalus_stellatus.jpg/2560px-Chthamalus_stellatus.jpg");
+                background: url("https://images.pexels.com/photos/1166644/pexels-photo-1166644.jpeg?_gl=1*nzqsrx*_ga*MTk5NDcyOTMxMC4xNzUzMjM1MTcx*_ga_8JE65Q40S6*czE3NTMyMzUxNzEkbzEkZzEkdDE3NTMyMzUyNjEkajMwJGwwJGgw");
                 background-size: cover
             }}
             </style>
@@ -236,7 +234,7 @@ def Trained_model():
     
     
     # Initializing my API Client
-    custom_configuration= InferenceConfiguration(confidence_threshold=0.3)
+    custom_configuration= InferenceConfiguration(confidence_threshold=0.2)
     CLIENT= InferenceHTTPClient(
     api_url ="https://serverless.roboflow.com", 
     api_key= "CW6dMrLkiMDw9IRcbujY"
@@ -247,9 +245,13 @@ def Trained_model():
     image_url_input= ""
     col1, col2 = st.columns(2)
     with col1: 
-        img_file_buffer = st.file_uploader('Upload an image', type=['png', 'jpg', 'jpeg'])
-    with col2: 
-        input_path = st.text_input("Entire the Image URL here")
+        result = f'<p style="font-family:sans-serif; color:Green; font-size: 20px;">Upload an image</p>'
+        st.markdown(result, unsafe_allow_html=True)
+        img_file_buffer = st.file_uploader(label= "",type=['png', 'jpg', 'jpeg'],)
+    with col2:    
+        result = f'<p style="font-family:sans-serif; color:Green; font-size: 20px;">Entire the Image URL</p>'
+        st.markdown(result, unsafe_allow_html=True)
+        input_path = st.text_input("")
     
     output_directory = tempfile.mkdtemp()
 
@@ -274,12 +276,12 @@ def Trained_model():
             return None
 
         img_width, img_height = pil_image_object.size
-        tile_width = img_width // 16
-        tile_height = img_height // 16
+        tile_width = img_width // 5
+        tile_height = img_height // 5
         tile_num = 0
 
         if tile_width == 0 or tile_height == 0:
-            print(f"Warning: Image {img_width}x{img_height} is too small for 1/16 tiling. No tiles will be generated.")
+            print(f"Warning: Image {img_width}x{img_height} is too small for 1/30 tiling. No tiles will be generated.")
             return 0
 
         for i in range(0, img_height, tile_height):
@@ -329,7 +331,6 @@ def Trained_model():
                 return None, f"URL image process error: {e}"
             
         else:
-            # Should not happen if input preparation logic is correct
             st.warn(f"Unhandled input type for cached function: {type(image_for_processing_bytes_or_url)}")
             return None, "Invalid input type for analysis."
 
@@ -389,8 +390,9 @@ def Trained_model():
                 total_barnacles, status = run_barnacle_analysis(hashable_input)
 
             if status == "Success":
-                st.metric("Total Barnacles Detected", value=total_barnacles)
-                st.info("Analysis complete!")
+                result = f'<p style="font-family:sans-serif; color:Black; font-size: 42px;">Total Number of Barnacles:{total_barnacles}</p>'
+                st.markdown(result, unsafe_allow_html=True)
+                st.success("Analysis complete!", icon="✅")
             else:
                 st.error(f"Analysis failed: {status}")
                 st.warning(f"Please check the input image/URL. Reason: {status}")
@@ -417,7 +419,9 @@ def Computer_vision():
     from IPython.display import  display
     import tempfile 
     import shutil
-    
+
+    st.set_page_config(page_title= "CV", page_icon = '🎨' )
+
     #function to change the background color 
     def set_bg_url():
         '''
@@ -431,7 +435,7 @@ def Computer_vision():
             f"""
             <style>
             .stApp {{
-                background: url("https://upload.wikimedia.org/wikipedia/commons/thumb/7/72/Chthamalus_stellatus.jpg/2560px-Chthamalus_stellatus.jpg");
+                background: url("https://images.pexels.com/photos/1166644/pexels-photo-1166644.jpeg?_gl=1*nzqsrx*_ga*MTk5NDcyOTMxMC4xNzUzMjM1MTcx*_ga_8JE65Q40S6*czE3NTMyMzUxNzEkbzEkZzEkdDE3NTMyMzUyNjEkajMwJGwwJGgw");
                 background-size: cover
             }}
             </style>
@@ -496,23 +500,19 @@ def Computer_vision():
     </div>
     """, unsafe_allow_html=True)
 
-    custom_css = """
-    <style>
-    div[data-testid="stFileUploader"]>section[data-testid="stFileUploadDropzone"]>button[data-testid="baseButton-secondary"] {
-        background-color: #4CAF50; /* Green */
-        color: white;
-    }
-    </style>
-    """
-    st.markdown(custom_css, unsafe_allow_html=True)
+
     col1, col2 = st.columns(2)
     
     img_file_buffer=None
     image_url_input= ""
     with col1: 
-        img_file_buffer = st.file_uploader('Upload an image', type=['png', 'jpg', 'jpeg'])
+        result = f'<p style="font-family:sans-serif; color:Green; font-size: 20px;">Upload an image</p>'
+        st.markdown(result, unsafe_allow_html=True)
+        img_file_buffer = st.file_uploader(label= "",type=['png', 'jpg', 'jpeg'],)
     with col2:    
-        input_path = st.text_input("Entire the Image URL here")
+        result = f'<p style="font-family:sans-serif; color:Green; font-size: 20px;">Entire the Image URL</p>'
+        st.markdown(result, unsafe_allow_html=True)
+        input_path = st.text_input("")
     
     output_directory = tempfile.mkdtemp()
 
@@ -592,7 +592,8 @@ def Computer_vision():
         # watershed Algorithm
         img_array = np.array(image).astype(np.uint8)
         markers = cv2.watershed(img_array, markers)
-
+        fig, ax = plt.subplots(figsize=(5, 5))
+        
 
         labels = np.unique(markers)
         coins = []
@@ -609,9 +610,9 @@ def Computer_vision():
             coins.append(contours[0])
 
         # Draw the outline
-        contour_image = cv2.drawContours(image_array, coins, -1, color=(0, 23, 223), thickness=2)
+        contour_image = cv2.drawContours(image_array, coins, -1, color=(255, 255, 255), thickness=2)
         plt.imshow(image, cmap ='grey')
-        return  len(coins), "Success", markers
+        return  len(coins), "Success", contour_image
     
 
     
@@ -638,12 +639,15 @@ def Computer_vision():
 
         else:
             with st.spinner("Running analysis... This might take a moment."):
-                total_barnacles, status, display_image = image_processing(hashable_input)
+                total_barnacles, status , image= image_processing(hashable_input)
 
             if status == "Success":
-                st.metric("Total Barnacles Detected", value=total_barnacles)
+                result = f'<p style="font-family:sans-serif; color:Black; font-size: 42px;">Total Number of Barnacles:{total_barnacles}</p>'
+                st.markdown(result, unsafe_allow_html=True)
                 st.success("Analysis complete!", icon="✅")
-                st.image(display_image, caption='Visualization of the barnacles')
+                new_title = '<p style="font-family:sans-serif; color:Green; font-size: 42px;">Visualization</p>'
+                st.markdown(new_title, unsafe_allow_html=True)
+                st.image(image)
 
             else:
                 st.error(f"Analysis failed: {status}")
