@@ -3,9 +3,13 @@ import base64
 import os 
 import requests
 import io
-import numpy as np 
+import tempfile
+from inference_sdk import InferenceHTTPClient, InferenceConfiguration
+import pandas as pd
+from ultralytics import YOLO
 
-def crop_image_into_tiles(image, output_folder):
+
+def crop_image_into_tiles(image, output_folder, number_of_tiles=5):
    
     """
 
@@ -41,10 +45,11 @@ def crop_image_into_tiles(image, output_folder):
                 img = Image.open(image)
             except FileNotFoundError:
                 print(f"Error: Image not found at {image}")
-                return
+                
+                return 
 
     img_width, img_height = img.size
-    tile_width, tile_height = img_width//5, img_height//5
+    tile_width, tile_height = img_width//number_of_tiles, img_height//number_of_tiles
     tile_num = 0  
 
     for i in range(0, img_height, tile_height):
@@ -55,7 +60,7 @@ def crop_image_into_tiles(image, output_folder):
             tile_num += 1
             
     print("Image cropped successfully")
-    return
+    return number_of_tiles
 
 
 def image_to_base64(image_path): 
@@ -93,3 +98,97 @@ def remove_files_from_directory(directory_path):
     except OSError as e: 
         print(f"Errror:{e}")
     
+
+def save_file(filename:str, dataset1:list, dataset2:list):
+
+    data = {'col1': [1, 2, 3], 'col2': [4, 5, 6]}
+    df = pd.DataFrame(data)
+
+    # Save the DataFrame to a CSV file
+    df.to_csv(filename, index=False)
+
+    # Save the DataFrame to a pickle file
+    df.to_pickle('my_data.pkl')
+
+
+
+def api_model(image_address, confidence_value, number_tiles=5):
+
+    with tempfile.TemporaryDirectory() as tmpdir:
+        output_directory  = tmpdir
+        
+    image_path = image_address
+
+    try : 
+        os.mkdir(output_directory)
+        print(f"Directory '{output_directory}' created successfully.")
+
+    #Already created this file
+    except FileExistsError: 
+        print(f"Directory '{output_directory}' already exists.")
+
+    #Check access and permissions settings 
+    except PermissionError: 
+        print(f"Permission denied: Unable to create '{output_directory}.")
+
+    #Any other type of errors 
+    except Exception as e: 
+        print(f"An error occured:{e}") 
+
+    tiles = crop_image_into_tiles(image_path,output_directory, number_tiles)
+
+
+    custom_configuration= InferenceConfiguration(confidence_threshold=confidence_value)
+    CLIENT= InferenceHTTPClient(
+        api_url ="https://serverless.roboflow.com", 
+        api_key= "CW6dMrLkiMDw9IRcbujY"
+    )
+    number_of_barnacles= 0
+    number_of_images= directory_size(output_directory)
+    for i in range(number_of_images):
+        with CLIENT.use_configuration(custom_configuration):
+            result = CLIENT.infer(f"{output_directory}/tile_{i}.png", model_id = "barnacles-lnd34/1")
+        number_of_barnacles+= len(result['predictions'])
+
+    remove_files_from_directory(output_directory)
+
+    return number_of_barnacles , tiles
+
+
+def trained_model(image_address, number_tiles= 5): 
+    
+    model = YOLO('best.pt')
+
+    with tempfile.TemporaryDirectory() as tmpdir:
+        output_directory  = tmpdir
+        
+    image_path = image_address
+
+    try : 
+        os.mkdir(output_directory)
+        print(f"Directory '{output_directory}' created successfully.")
+
+    #Already created this file
+    except FileExistsError: 
+        print(f"Directory '{output_directory}' already exists.")
+
+    #Check access and permissions settings 
+    except PermissionError: 
+        print(f"Permission denied: Unable to create '{output_directory}.")
+
+    #Any other type of errors 
+    except Exception as e: 
+        print(f"An error occured:{e}")
+
+    tiles = crop_image_into_tiles(image_path,output_directory, number_tiles)
+
+    number_of_barnacles= 0
+    number_of_images= directory_size(output_directory)
+    for i in range(number_of_images):
+        
+        result = model(f"{output_directory}/tile_{i}.png", verbose= False)
+        count = len(result[0].boxes)
+        number_of_barnacles+= count
+    remove_files_from_directory(output_directory)
+
+    return number_of_barnacles, tiles
