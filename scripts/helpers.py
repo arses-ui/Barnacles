@@ -7,7 +7,9 @@ import tempfile
 from inference_sdk import InferenceHTTPClient, InferenceConfiguration
 import pandas as pd
 from ultralytics import YOLO
-
+import numpy as np 
+from scipy.ndimage import gaussian_filter
+import cv2
 
 def crop_image_into_tiles(image, output_folder, number_of_tiles=5):
    
@@ -192,3 +194,69 @@ def trained_model(image_address, number_tiles= 5):
     remove_files_from_directory(output_directory)
 
     return number_of_barnacles, tiles
+
+
+def traditional_cv_medthod(image_address, threshold):
+
+    #filtering and grayscale
+    image = Image.open(image_address).convert("RGB")
+    grayscale_image = image.convert("L")
+    image_array = np.array(grayscale_image)
+    gaussian_filtered_image = gaussian_filter(image_array, sigma=1)
+
+    #applying otsu threshold
+    otsu_threshold, image_after_otsu = cv2.threshold(
+    gaussian_filtered_image, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU, )
+
+    #cleaning 
+    kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (3, 3))
+    cleaned_image = cv2.morphologyEx(image_after_otsu, 
+                           cv2.MORPH_OPEN,
+                               kernel,
+                           iterations=1)    
+
+    # sure background area
+    intermediary_bg = cv2.erode(cleaned_image, kernel, iterations=3)
+    sure_bg = cv2.dilate(intermediary_bg, kernel, iterations=4)
+    # Distance transform
+    dist = cv2.distanceTransform(cleaned_image, cv2.DIST_L2,5)
+    # foreground area
+    ret, sure_fg = cv2.threshold(dist, threshold * dist.max(), 255, cv2.THRESH_BINARY)
+    sure_fg = sure_fg.astype(np.uint8)
+    # unknown area
+    unknown = cv2.subtract(sure_bg, sure_fg)
+    # Marker labelling
+    # sure foreground 
+    ret, markers = cv2.connectedComponents(sure_fg)
+
+    # Add one to all labels so that background is not 0, but 1
+    markers += 1
+    # mark the region of unknown with zero
+    markers[unknown == 255] = 0
+
+    # watershed Algorithm
+    img_array = np.array(image).astype(np.uint8)
+    markers = cv2.watershed(img_array, markers)
+
+    labels = np.unique(markers)
+
+    barnacles = []
+    for label in labels[2:]:  
+
+    # Create a binary image in which only the area of the label is in the foreground and the rest of the image is in the background   
+        target = np.where(markers == label, 255, 0).astype(np.uint8)
+    
+    # Perform contour extraction on the created binary image
+        contours, hierarchy = cv2.findContours(
+            target, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE
+        )
+        barnacles.append(contours[0])
+
+    # Draw the outline
+    image = cv2.drawContours(image_array, barnacles, -1, color=(0, 23, 223), thickness=2)
+
+
+    return len(barnacles)
+        
+
+ 

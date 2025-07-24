@@ -23,6 +23,8 @@ Feel free to reach out with any questions or suggestions regarding this project.
 
 -[Dependencies](#dependencies) 
 
+-[Conclusion](#conclusion)
+
 -[Author](#author)
 
 
@@ -75,6 +77,12 @@ The files for this project have been refactored into different directories for b
 ## Dependencies
 - Python 3.9.0 [Download here](https://www.python.org/downloads/release/python-390/) (The python packages recommended are 3.9.0 <=>3.10.0 due to some of the libraries installed)
 - Packages listed in requirements.txt 
+
+## Conclusion
+
+Among the three approaches tested, the trained model demonstrated the most promise. Although it was trained on a relatively small dataset, it was able to accurately count the number of barnacles in images, particularly when the number of objects was limited. In contrast, the traditional image processing method performed poorer than expected, offering little adaptability and requiring  manual tuning of parameters to work for each individual image.
+
+For future work, I believe the best direction is to curate a larger dataset and fine-tune a pre-trained object detection model such as YOLOv11. Although the data preparation process may be time-consuming, this approach would allow the model to generalize better across various image conditions and barnacle types, ultimately leading to more robust and scalable performance.
 
 ## Author
 Arses Prasai -[Github](https://github.com/arses-ui)         
