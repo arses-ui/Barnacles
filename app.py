@@ -224,10 +224,10 @@ def Trained_model():
     st.markdown(f"""
     <div class="bounding-box">
                 <p>
-    However, I ran into a problem. The pre-trained model I call using an API call is trained on dataset consisting of only a few barnacles
-        per image. As a result, it did not perform great for images with large number of barnacles. Similarly, the the dataset I trained 
-        to used to train my own model also contained a relatively small number of barnacles per image. As a result, I take an extra step in my 
-        my approach, and break the image down into approximately 30 smaller images, and perform inference on all the images individually. 
+    The dataset I used to train my own model contained relatively few barnacles per image, similar to the dataset used to train the pre-trained model 
+                I access through an API. As a result, both models struggled to accurately detect barnacles in images with a large number of them. To
+                 address this limitation, I introduced an additional step in my approach: breaking each input image into approximately 30 smaller 
+                tiles and running inference on each tile individually.
                 </p>
                 </div>  
         """, unsafe_allow_html=True)
@@ -248,9 +248,9 @@ def Trained_model():
         image_url_input = st.text_input("")
     
     output_directory = tempfile.mkdtemp()
-
+    st.markdown(''' <p style="font-family:sans-serif; color:Green; font-size: 20px;">Select the model you want to use</p>''', unsafe_allow_html=True)
     option = st.selectbox(
-    'Which model would you like to use?',
+    '',
     ('Trained Model', 'API model'),
     index=None,
     placeholder="Select contact method..."
@@ -318,18 +318,58 @@ def Trained_model():
                 return None, f"Image conversion error: {e}"
             
         elif isinstance(image_for_processing_bytes_or_url, str):
-            # It's a URL string
-            try:
-                response = requests.get(image_for_processing_bytes_or_url)
-                response.raise_for_status()
-                pil_image_to_process = Image.open(io.BytesIO(response.content))
-            except requests.exceptions.RequestException as e:
-                print(f"Error downloading image from URL: {e}")
-                return None, f"Download error: {e}"
-            except Exception as e:
-                print(f"Error processing URL content: {e}")
-                return None, f"URL image process error: {e}"
             
+            # It's a string, could be a URL or a local path
+            input_string = image_for_processing_bytes_or_url
+
+            # Check if it's a local file path first
+            if os.path.exists(input_string):
+                try:
+                    # Check if it's a valid image file using Pillow's verification
+                    with Image.open(input_string) as img:
+                        img.verify() # Verify if it's an image without fully loading it
+                    
+                    # If verification passes, it's a local image. Load it.
+                    pil_image_to_process = Image.open(input_string)
+                    pil_image_to_process.load() # Load image data into memory
+                    print(f"Loaded local image from path: {input_string}")
+                except FileNotFoundError:
+                    error_message = f"Local file not found: {input_string}"
+                    st.warn(error_message)
+                except (IOError, SyntaxError) as e:
+                    error_message = f"Local file is not a valid image: {e}"
+                    st.warn(error_message)
+                except Exception as e:
+                    error_message = f"An unexpected error occurred with local file: {e}"
+                    st.warn(error_message)
+            
+            # If not a local file path, check if it is a URL
+            else:
+                #URL validation
+                # For simplicity, we'll proceed assuming it's a URL if it's not a local path
+                print(f"Attempting to load as URL: {input_string}")
+                try:
+                    # Make a HEAD request first to check content type if you want to be more efficient
+                    response = requests.get(input_string, timeout=10) # Added a timeout
+                    response.raise_for_status() # Raises an HTTPError for bad responses 
+
+                    # Check content-type if you want to explicitly verify it's an image before opening
+                    content_type = response.headers.get('Content-Type', '').lower()
+                    if not content_type.startswith('image/'):
+                        error_message = f"URL content type is '{content_type}', not an image."
+                        st.warn(error_message)
+                    else:
+                        pil_image_to_process = Image.open(io.BytesIO(response.content))
+                        print(f"Loaded image from URL: {input_string}")
+
+                except requests.exceptions.RequestException as e:
+                    error_message = f"Error downloading image from URL: {e}"
+                    print(error_message) 
+                except Exception as e:
+                    error_message = f"Error processing URL content: {e}"
+                    print(error_message) 
+        
+
         else:
             st.warn(f"Unhandled input type for cached function: {type(image_for_processing_bytes_or_url)}")
             return None, "Invalid input type for analysis."
@@ -391,18 +431,57 @@ def Trained_model():
                 return None, f"Image conversion error: {e}"
             
         elif isinstance(image_for_processing_bytes_or_url, str):
-            # It's a URL string
-            try:
-                response = requests.get(image_for_processing_bytes_or_url)
-                response.raise_for_status()
-                pil_image_to_process = Image.open(io.BytesIO(response.content))
-            except requests.exceptions.RequestException as e:
-                print(f"Error downloading image from URL: {e}")
-                return None, f"Download error: {e}"
-            except Exception as e:
-                print(f"Error processing URL content: {e}")
-                return None, f"URL image process error: {e}"
             
+            # It's a string, could be a URL or a local path
+            input_string = image_for_processing_bytes_or_url
+
+            # Check if it's a local file path first
+            if os.path.exists(input_string):
+                try:
+                    # Check if it's a valid image file using Pillow's verification
+                    with Image.open(input_string) as img:
+                        img.verify() # Verify if it's an image without fully loading it
+                    
+                    # If verification passes, it's a local image. Load it.
+                    pil_image_to_process = Image.open(input_string)
+                    pil_image_to_process.load() # Load image data into memory
+                    print(f"Loaded local image from path: {input_string}")
+                except FileNotFoundError:
+                    error_message = f"Local file not found: {input_string}"
+                    st.warn(error_message)
+                except (IOError, SyntaxError) as e:
+                    error_message = f"Local file is not a valid image: {e}"
+                    st.warn(error_message)
+                except Exception as e:
+                    error_message = f"An unexpected error occurred with local file: {e}"
+                    st.warn(error_message)
+            
+            # If not a local file path, check if it is a URL
+            else:
+                #URL validation
+                # For simplicity, we'll proceed assuming it's a URL if it's not a local path
+                print(f"Attempting to load as URL: {input_string}")
+                try:
+                    # Make a HEAD request first to check content type if you want to be more efficient
+                    response = requests.get(input_string, timeout=10) # Added a timeout
+                    response.raise_for_status() # Raises an HTTPError for bad responses 
+
+                    # Check content-type if you want to explicitly verify it's an image before opening
+                    content_type = response.headers.get('Content-Type', '').lower()
+                    if not content_type.startswith('image/'):
+                        error_message = f"URL content type is '{content_type}', not an image."
+                        st.warn(error_message)
+                    else:
+                        pil_image_to_process = Image.open(io.BytesIO(response.content))
+                        print(f"Loaded image from URL: {input_string}")
+
+                except requests.exceptions.RequestException as e:
+                    error_message = f"Error downloading image from URL: {e}"
+                    print(error_message) 
+                except Exception as e:
+                    error_message = f"Error processing URL content: {e}"
+                    print(error_message) 
+        
         else:
             st.warn(f"Unhandled input type for cached function: {type(image_for_processing_bytes_or_url)}")
             return None, "Invalid input type for analysis."
@@ -458,16 +537,22 @@ def Trained_model():
             hashable_input = image_url_input
 
         if hashable_input is None:
-            st.warning("Please upload an image or provide a valid image URL to proceed.")
+            st.markdown(
+                    """
+                        <p style="color:red; font-weight:bold;">Error! Please enter a valid image or URL address</p>
+                        """,
+                     unsafe_allow_html=True
+                        )
+
 
         else:
             if option == 'API model':
-                with st.spinner("Running analysis... This might take a moment."):
+                with st.spinner(""):
                     total_barnacles, status = run_barnacle_analysis_api(hashable_input)
 
             elif option  == 'Trained Model':
-                with st.spinner("Running analysis... This might take a moment."):
-                    total_barnacles, status = run_barnacle_analysis(hashable_input)
+                with st.spinner(""):
+                    total_barnacles, status = run_barnacle_analysis_trained(hashable_input)
             else: 
                 st.error(f"Please select a training model")
                 status = "No model selected"
@@ -475,20 +560,29 @@ def Trained_model():
             if status == "Success":
                 result = f'<p style="font-family:sans-serif; color:Black; font-size: 42px;">Total Number of Barnacles:{total_barnacles}</p>'
                 st.markdown(result, unsafe_allow_html=True)
-                st.success("Analysis complete!", icon="✅")
+                st.markdown("""
+                        <p style="color:green;font-size:20px; font-weight:bold;">✅ Analysis complete!</p>
+                        """,
+                     unsafe_allow_html=True
+                        )
             else:
-                st.error(f"Analysis failed: {status}")
-                st.warning(f"Please check the input image/URL. Reason: {status}")
+                st.markdown(
+                    f"""
+                        <p style="color:red; font-weight:bold;">Error! {status}</p>
+                        """,
+                     unsafe_allow_html=True
+                        )
 
     try: 
         shutil.rmtree(output_directory)
     except Exception as e: 
-        st.warning(f"Error cleaning up the temporary directory: {e}")
+        st.markdown(
+                    f"""
+                        <p style="color:red; font-weight:bold;">Error cleaning up the temporary directory: {e}</p>
+                        """,
+                     unsafe_allow_html=True
+        )
 
-
-
-
-        
 
 
 def Computer_vision(): 
@@ -574,14 +668,22 @@ def Computer_vision():
     st.markdown(f"""
     <div class="bounding-box">
         <p>
-        In this page, I present my second approach to tackle the provided challenge. In all honestly, one of the main reasons I chose this
-        approach was purely just to traditional computer vision image-processing techniques. To describe it briefly, I sequentlly perform 
-        different transformations and processing techniques, namely filtering, binarization, Morphological Transformations and Contouring. I use popular methods like 
-        Otsu' method for thresholding and Watershed Algorithm for image segmentation. Finally, by keeping track of the total different contour objects, 
-        I count the number of barnacles in the given image. 
+        On this page, I present my approach to tackling the challenge using traditional computer vision and image processing techniques. 
+        I chose this direction out of both curiosity and a desire to explore classical methods. This approach involves a sequence of operations, 
+        including filtering, binarization, morphological transformations, and contour detection. I utilize well-known techniques such as Otsu’s 
+        thresholding for binarization and the Watershed algorithm for segmentation. By identifying and counting distinct contour objects, the number 
+        of barnacles in the image is estimated.
         </p>
     </div>
+                
     """, unsafe_allow_html=True)
+    st.markdown(f"""
+    <div class="bounding-box">
+        <p>
+    Please upload an image of barnacles belwo. The processing pipeline will apply the steps above and return the original image with detected contours overlaid.
+        </p>
+            </div>
+            """, unsafe_allow_html=True)
 
 
     col1, col2 = st.columns(2)
@@ -595,13 +697,13 @@ def Computer_vision():
     with col2:    
         result = f'<p style="font-family:sans-serif; color:Green; font-size: 20px;">Entire the Image URL</p>'
         st.markdown(result, unsafe_allow_html=True)
-        input_path = st.text_input("")
+        image_url_input = st.text_input("")
     
     output_directory = tempfile.mkdtemp()
 
     @st.cache_data(show_spinner=False) 
     def image_processing(image_for_processing_bytes_or_url, THRESHOLD=0.27): 
-        # 1. Conert hashable input (bytes or URL) into a PIL Image object
+        # 1. Convert hashable input (bytes or URL) into a PIL Image object
         pil_image_to_process = None
         if isinstance(image_for_processing_bytes_or_url, bytes):
             # It's bytes from an uploaded file
@@ -612,18 +714,58 @@ def Computer_vision():
                 return None, f"Image conversion error: {e}"
             
         elif isinstance(image_for_processing_bytes_or_url, str):
-            # It's a URL string
-            try:
-                response = requests.get(image_for_processing_bytes_or_url)
-                response.raise_for_status()
-                pil_image_to_process = Image.open(io.BytesIO(response.content))
-            except requests.exceptions.RequestException as e:
-                print(f"Error downloading image from URL: {e}")
-                return None, f"Download error: {e}"
-            except Exception as e:
-                print(f"Error processing URL content: {e}")
-                return None, f"URL image process error: {e}"
             
+            # It's a string, could be a URL or a local path
+            input_string = image_for_processing_bytes_or_url
+
+            # Check if it's a local file path first
+            if os.path.exists(input_string):
+                try:
+                    # Check if it's a valid image file using Pillow's verification
+                    with Image.open(input_string) as img:
+                        img.verify() # Verify if it's an image without fully loading it
+                    
+                    # If verification passes, it's a local image. Load it.
+                    pil_image_to_process = Image.open(input_string)
+                    pil_image_to_process.load() # Load image data into memory
+                    print(f"Loaded local image from path: {input_string}")
+                except FileNotFoundError:
+                    error_message = f"Local file not found: {input_string}"
+                    st.warn(error_message)
+                except (IOError, SyntaxError) as e:
+                    error_message = f"Local file is not a valid image: {e}"
+                    st.warn(error_message)
+                except Exception as e:
+                    error_message = f"An unexpected error occurred with local file: {e}"
+                    st.warn(error_message)
+            
+            # If not a local file path, check if it is a URL
+            else:
+                #URL validation
+                # For simplicity, we'll proceed assuming it's a URL if it's not a local path
+                print(f"Attempting to load as URL: {input_string}")
+                try:
+                    # Make a HEAD request first to check content type if you want to be more efficient
+                    response = requests.get(input_string, timeout=10) # Added a timeout
+                    response.raise_for_status() # Raises an HTTPError for bad responses 
+
+                    # Check content-type if you want to explicitly verify it's an image before opening
+                    content_type = response.headers.get('Content-Type', '').lower()
+                    if not content_type.startswith('image/'):
+                        error_message = f"URL content type is '{content_type}', not an image."
+                        st.warn(error_message)
+                    else:
+                        pil_image_to_process = Image.open(io.BytesIO(response.content))
+                        print(f"Loaded image from URL: {input_string}")
+
+                except requests.exceptions.RequestException as e:
+                    error_message = f"Error downloading image from URL: {e}"
+                    print(error_message) 
+                except Exception as e:
+                    error_message = f"Error processing URL content: {e}"
+                    print(error_message) 
+        
+
         else:
             # Should not happen if input preparation logic is correct
             st.warn(f"Unhandled input type for cached function: {type(image_for_processing_bytes_or_url)}")
@@ -706,10 +848,6 @@ def Computer_vision():
         hashable_input = None
 
         if img_file_buffer is not None:
-            # Read the bytes from the UploadedFile. This makes it hashable.
-            # Use seek(0) to ensure the buffer is read from the beginning
-            # in case it was already read (e.g., by st.image above).
-            img_file_buffer.seek(0)
             hashable_input = img_file_buffer.read()
 
 
@@ -718,16 +856,26 @@ def Computer_vision():
             hashable_input = image_url_input
 
         if hashable_input is None:
-            st.warning("Please upload an image or provide a valid image URL to proceed.")
+            st.markdown(
+                    """
+                        <p style="color:red; font-weight:bold;">Error! Please enter a valid image or URL address</p>
+                        """,
+                     unsafe_allow_html=True
+                        )
+
 
         else:
-            with st.spinner("Running analysis... This might take a moment."):
+            with st.spinner(""):
                 total_barnacles, status , image= image_processing(hashable_input)
 
             if status == "Success":
                 result = f'<p style="font-family:sans-serif; color:Black; font-size: 42px;">Total Number of Barnacles:{total_barnacles}</p>'
                 st.markdown(result, unsafe_allow_html=True)
-                st.success("Analysis complete!", icon="✅")
+                st.markdown("""
+                        <p style="color:green;font-size:20px; font-weight:bold;">✅ Analysis complete!</p>
+                        """,
+                     unsafe_allow_html=True
+                        )
                 new_title = '<p style="font-family:sans-serif; color:Green; font-size: 42px;">Visualization</p>'
                 st.markdown(new_title, unsafe_allow_html=True)
                 st.image(image)
@@ -739,15 +887,21 @@ def Computer_vision():
     try: 
         shutil.rmtree(output_directory)
     except Exception as e: 
-        st.warning(f"Error cleaning up the temporary directory: {e}")
+        st.markdown(
+                    f"""
+                        <p style="color:red; font-weight:bold;">Error cleaning up the temporary directory: {e}</p>
+                        """,
+                     unsafe_allow_html=True
+        )
 
 
 
 
 page_names_to_funcs= {
-"-":intro, 
-"Approach 1: Training model": Trained_model, 
-"Approach 2: Traditional CV": Computer_vision
+"Welcome Page":intro, 
+"Approach 1: Traditional CV": Computer_vision,
+"Approach 2: Training model": Trained_model
+
 }
 
 project_name = st.sidebar.selectbox("Choose a project", page_names_to_funcs.keys())
