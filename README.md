@@ -38,11 +38,19 @@ b. venv\Scripts\activate #For Windows Command Prompt
 c. venv/bin/activate #For Mac/Linux
 ```
 
-5. Install requried packages:
+5.Install ipykernel <br>
+If you want to run the jupyter notebooks and reproduce the results, install ipykernel using pip . 
+
+```bash 
+pip install ipykernel 
+python -m ipykernel install --user --name=venv --display_name="Barnacles" 
+```
+
+6. Install requried packages:
 ```bash
 pip install -r requirements.txt 
  ```
-5. Run the Project Demo locally:
+7. Run the Project Demo locally:
 ```bash
 streamlit run app.py
 ```
