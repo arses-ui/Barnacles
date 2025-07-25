@@ -1,31 +1,21 @@
 # DALI Challenge : Barnacles
 
 # Introduction
+<font size=4>
+This project is my submission for the DALI application challenge, focused on the  detection and counting of barnacles in images. Motivated by a desire to compare different methodologies, I developed and evaluated three distinct pipelines: traditional computer vision techniques, a custom-trained deep learning model (YOLOv11), and an approach leveraging an external API. This comparative study not only aims to identify the most effective solution, but also to highlight the strengths and limitations of classical rule-based methods versus modern deep learning architectures like YOLOv11.
 
-This project is my submission for the DALI application challenge, focusing on the robust detection and counting of barnacles in images. Driven by an interest in comparing methodologies, I've developed and evaluated three distinct pipelines: traditional computer vision techniques, a custom-trained deep learning model (YOLO11), and an approach using an external API. This comparative study aims to not only identify the most optimal solution but also to provide insights into the strengths and weaknesses of classical computer vision methods versus state-of-the-art deep learning architectures like YOLO11. More specifically, I employ the given pipelines due to the following motivations: 
+The chosen pipelines were selected based on the following motivations:
 
-1. Traditional CV: To establish a baseline performance and explore popular, rule-based approaches.
-2. Trained Model: To utilize the power of deep learning and test against Traditional CV methods.
-3. API Model: To explore the feasibility and convenience of utilizing readily available, high-performance pre-trained models."
+1. Traditional Computer Vision: To establish a baseline and explore popular rule-based methods.
+2. rained Model: To utilize deep learning’s capabilities and benchmark them against classical techniques.
+3. API Model: To assess the practicality and performance of using pre-trained, publicly available models.
 
-
-Each pipeline is thoroughly described within its respective Jupyter notebook, where I've also extensively evaluated their performance across various relevant conditions and hyperparameter configurations, aiming to provide comprehensive observations and explanations.
+Each pipeline is properly documented and evaluated in its respective Jupyter notebook, where I tested their performance under various conditions and hyperparameter settings. These evaluations are supplemented with observations and analysis to offer a well-rounded understanding of each method's behavior.
 
 Feel free to reach out with any questions or suggestions regarding this project.
 
-
-## Table of Contents 
--[Installation](#installation) 
-
--[Output](#output)
-
--[Files](#files)
-
--[Dependencies](#dependencies) 
-
--[Conclusion](#conclusion)
-
--[Author](#author)
+## Table of Contents  
+[Installation](#installation) &nbsp;&nbsp;&nbsp;&nbsp; [Output](#output) &nbsp;&nbsp;&nbsp;&nbsp; [Files](#files) &nbsp;&nbsp;&nbsp;&nbsp; [Dependencies](#dependencies) &nbsp;&nbsp;&nbsp;&nbsp; [Conclusion](#conclusion) &nbsp;&nbsp;&nbsp;&nbsp; [Learning Process](#learning-process) &nbsp;&nbsp;&nbsp;&nbsp; [Author](#author)
 
 
 ## Installation
@@ -35,15 +25,20 @@ git clone https://github.com/arses-ui/Barnacles.git
 cd your-repository-name
 ```
 
-2. Create and activate a virtual environment:
+2. Install virtual env to specify the python version
+```bash 
+pip install virtualenv
+```
+
+4. Create and activate a virtual environment:
 ```bash
-python -m venv venv 
+virtualenv --python=c:/path/to/your/python3.9/python.exe venv
 a. source venv/Scripts/activate # For Windows + Git Bash or WSL
 b. venv\Scripts\activate #For Windows Command Prompt 
 c. venv/bin/activate #For Mac/Linux
 ```
 
-3. Install requried packages:
+5. Install requried packages:
 ```bash
 pip install -r requirements.txt 
  ```
@@ -66,17 +61,25 @@ The files for this project have been refactored into different directories for b
     - `trained_model.ipynb`  Jupyter Notebook with the Trained model Pipeline 
     - `api-model.ipynb`   Jupyter Notebook with the API-model Pipeline 
     - `best.pt`  Best parameters for the trained model 
+    - `helpers.py` python module consisting of helper functions used in the three notebooks
 
 - Training_Results
     - `results.csv` Results of the training on the YOLO11 model
     - `results.png` Visulization of the training statistics on the YOLO11 model
     - `YOLO11.ipynb` Jupyter Notebook containing the training code
 
-- `app.py` #app module that demonstrates my work as a web app utilizing streamlit platform
+- `app.py` Python module to demonstrate my work as a web app utilizing streamlit platform
 
 ## Dependencies
 - Python 3.9.0 [Download here](https://www.python.org/downloads/release/python-390/) (The python packages recommended are 3.9.0 <=>3.10.0 due to some of the libraries installed)
 - Packages listed in requirements.txt 
+
+## Learning Process
+
+This challenge provided the perfect opportunity for me to explore and better understand classical computer vision. While I had some prior experience with image processing techniques and large multimodal models through my research work, I was relatively unfamiliar with traditional CV algorithms such as the Watershed algorithm and Connected Components labeling. Working on this project allowed me to engage with these techniques hands-on.
+
+Additionally, I used this challenge as a chance to experiment with different large models before ultimately selecting YOLOv11 for further training. This growing familiarity with both classical CV methods and state-of-the-art vision models is something I look forward to applying in future projects, both at DALI and in other settings.
+
 
 ## Conclusion
 

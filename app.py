@@ -233,16 +233,10 @@ def Trained_model():
         """, unsafe_allow_html=True)
     
     
-    # Initializing my API Client
-    custom_configuration= InferenceConfiguration(confidence_threshold=0.2)
-    CLIENT= InferenceHTTPClient(
-    api_url ="https://serverless.roboflow.com", 
-    api_key= "CW6dMrLkiMDw9IRcbujY"
-    )
-
     #Displaying two widgets for inputting image or image URL
     img_file_buffer=None
     image_url_input= ""
+
     col1, col2 = st.columns(2)
     with col1: 
         result = f'<p style="font-family:sans-serif; color:Green; font-size: 20px;">Upload an image</p>'
@@ -251,10 +245,16 @@ def Trained_model():
     with col2:    
         result = f'<p style="font-family:sans-serif; color:Green; font-size: 20px;">Entire the Image URL</p>'
         st.markdown(result, unsafe_allow_html=True)
-        input_path = st.text_input("")
+        image_url_input = st.text_input("")
     
     output_directory = tempfile.mkdtemp()
 
+    option = st.selectbox(
+    'Which model would you like to use?',
+    ('Trained Model', 'API model'),
+    index=None,
+    placeholder="Select contact method..."
+    )
 
     def crop_image_into_tiles(pil_image_object, output_folder):
         """
@@ -298,7 +298,80 @@ def Trained_model():
 
 
     @st.cache_data(show_spinner=False) # Underscore for _image_for_processing not needed if it's hashable
-    def run_barnacle_analysis(image_for_processing_bytes_or_url): # This argument must be hashable
+    def run_barnacle_analysis_api(image_for_processing_bytes_or_url): # This argument must be hashable
+        """
+        Performs the full barnacle analysis pipeline:
+        1. Converts input (bytes or URL) to PIL Image.
+        2. Crops the image into tiles and saves them.
+        3. Runs inference on each tile using the Roboflow client.
+        Returns total barnacles detected and a status message.
+        """
+
+        #  Convert hashable input (bytes or URL) into a PIL Image object
+        pil_image_to_process = None
+        if isinstance(image_for_processing_bytes_or_url, bytes):
+            # It's bytes from an uploaded file
+            try:
+                pil_image_to_process = Image.open(io.BytesIO(image_for_processing_bytes_or_url))
+            except Exception as e:
+                st.warn(f"Error opening bytes as PIL image: {e}")
+                return None, f"Image conversion error: {e}"
+            
+        elif isinstance(image_for_processing_bytes_or_url, str):
+            # It's a URL string
+            try:
+                response = requests.get(image_for_processing_bytes_or_url)
+                response.raise_for_status()
+                pil_image_to_process = Image.open(io.BytesIO(response.content))
+            except requests.exceptions.RequestException as e:
+                print(f"Error downloading image from URL: {e}")
+                return None, f"Download error: {e}"
+            except Exception as e:
+                print(f"Error processing URL content: {e}")
+                return None, f"URL image process error: {e}"
+            
+        else:
+            st.warn(f"Unhandled input type for cached function: {type(image_for_processing_bytes_or_url)}")
+            return None, "Invalid input type for analysis."
+
+        if pil_image_to_process is None:
+            return 0, "Failed to load image for processing."
+
+        # Perform the cropping (tiles are saved to output_directory)
+        tiles_count = crop_image_into_tiles(pil_image_to_process, output_directory) 
+
+        if tiles_count is None or tiles_count == 0:
+            return 0, "No tiles generated or cropping failed."
+        
+        # Initializing my API Client
+        custom_configuration= InferenceConfiguration(confidence_threshold=0.2)
+        CLIENT= InferenceHTTPClient(
+        api_url ="https://serverless.roboflow.com", 
+        api_key= "CW6dMrLkiMDw9IRcbujY"
+        )
+
+        # Barnacle Inference Loop
+        number_of_barnacles = 0
+        number_of_images = tiles_count
+
+        for i in range(number_of_images):
+            with CLIENT.use_configuration(custom_configuration):
+                image_tile_path = os.path.join(output_directory, f"tile_{i}.png")
+                if not os.path.exists(image_tile_path):
+                    print(f"Warning: Tile {image_tile_path} not found for inference.")
+                    continue
+
+                try:
+                    result = CLIENT.infer(image_tile_path, model_id="barnacles-lnd34/1")
+                    number_of_barnacles += len(result['predictions'])
+                except Exception as e:
+                    print(f"Error during inference for tile {i}: {e}")
+                    continue
+
+        return number_of_barnacles, "Success"
+    
+
+    def run_barnacle_analysis_trained(image_for_processing_bytes_or_url): # This argument must be hashable
         """
         Performs the full barnacle analysis pipeline:
         1. Converts input (bytes or URL) to PIL Image.
@@ -346,18 +419,21 @@ def Trained_model():
         # 3. Barnacle Inference Loop
         number_of_barnacles = 0
         number_of_images = tiles_count
+        model = YOLO('scripts/best.pt')
+
 
         for i in range(number_of_images):
-            with CLIENT.use_configuration(custom_configuration):
-                image_tile_path = os.path.join(output_directory, f"tile_{i}.png")
-                if not os.path.exists(image_tile_path):
-                    print(f"Warning: Tile {image_tile_path} not found for inference.")
-                    continue
+            image_tile_path = os.path.join(output_directory, f"tile_{i}.png")
+            if not os.path.exists(image_tile_path):
+                print(f"Warning: Tile {image_tile_path} not found for inference.")
+                continue
 
-                try:
-                    result = CLIENT.infer(image_tile_path, model_id="barnacles-lnd34/1")
-                    number_of_barnacles += len(result['predictions'])
-                except Exception as e:
+            try: 
+                result = model(f"{output_directory}/tile_{i}.png", verbose= False)
+                count = len(result[0].boxes)
+                number_of_barnacles+= count
+
+            except Exception as e:
                     print(f"Error during inference for tile {i}: {e}")
                     continue
 
@@ -372,8 +448,7 @@ def Trained_model():
 
         if img_file_buffer is not None:
             # Read the bytes from the UploadedFile. This makes it hashable.
-            # Use seek(0) to ensure the buffer is read from the beginning
-            # in case it was already read (e.g., by st.image above).
+            # Use seek(0) to ensure the buffer is read from the beginning in case it was already read (e.g., by st.image above).
             img_file_buffer.seek(0)
             hashable_input = img_file_buffer.read()
 
@@ -386,8 +461,16 @@ def Trained_model():
             st.warning("Please upload an image or provide a valid image URL to proceed.")
 
         else:
-            with st.spinner("Running analysis... This might take a moment."):
-                total_barnacles, status = run_barnacle_analysis(hashable_input)
+            if option == 'API model':
+                with st.spinner("Running analysis... This might take a moment."):
+                    total_barnacles, status = run_barnacle_analysis_api(hashable_input)
+
+            elif option  == 'Trained Model':
+                with st.spinner("Running analysis... This might take a moment."):
+                    total_barnacles, status = run_barnacle_analysis(hashable_input)
+            else: 
+                st.error(f"Please select a training model")
+                status = "No model selected"
 
             if status == "Success":
                 result = f'<p style="font-family:sans-serif; color:Black; font-size: 42px;">Total Number of Barnacles:{total_barnacles}</p>'
