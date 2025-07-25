@@ -96,7 +96,7 @@ def intro():
         <h3>Want to reach out or learn more about the project/challenge?</h3>
         <p>
             <li>Check out the code in my <a href="https://github.com/arses-ui/Barnacles.git" target="_blank">Github Repository</a></li>
-            <li>Chheck out the DALI Challenge <a href="https://dalilab.notion.site/Data-Challenge-2b3ecf13c9e14ce18932c95b095519a3">here!</a></li>
+            <li>Check out the DALI Challenge <a href="https://dalilab.notion.site/Data-Challenge-2b3ecf13c9e14ce18932c95b095519a3">here!</a></li>
             <li>Send me a message through email: <a href="mailto:arses.prasai.28@dartmouth.edu">arses.prasai.28@dartmouth.edu</a></li>
         </p></span>     
     </div>
@@ -680,7 +680,7 @@ def Computer_vision():
     st.markdown(f"""
     <div class="bounding-box">
         <p>
-    Please upload an image of barnacles belwo. The processing pipeline will apply the steps above and return the original image with detected contours overlaid.
+    Please upload an image of barnacles below. The processing pipeline will apply the steps above and return the original image with detected contours overlaid.
         </p>
             </div>
             """, unsafe_allow_html=True)
