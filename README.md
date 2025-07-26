@@ -8,7 +8,6 @@ The chosen pipelines were selected based on the following motivations:
 
 1. Traditional Computer Vision: To establish a baseline and explore popular rule-based methods.
 2. rained Model: To utilize deep learning’s capabilities and benchmark them against classical techniques.
-3. API Model: To assess the practicality and performance of using pre-trained, publicly available models.
 
 Each pipeline is properly documented and evaluated in its respective Jupyter notebook, where I tested their performance under various conditions and hyperparameter settings. These evaluations are supplemented with observations and analysis to offer a well-rounded understanding of each method's behavior.
 
@@ -65,27 +64,44 @@ streamlit run app.py
 
 The files for this project have been refactored into different directories for better organization. The contents of the files are as follows: 
 
-- scripts
+- Trained_model
     - images
-        - `mask1.png` 
-        - `mask2.png`
         - `sample_image.png`
         - `sample_image2.png`
-    - `traditionalcv.ipynb`  Jupyter Notebook with the Computer Vision Pipeline 
-    - `trained_model.ipynb`  Jupyter Notebook with the Trained model Pipeline 
-    - `api-model.ipynb`   Jupyter Notebook with the API-model Pipeline 
-    - `best.pt`  Best parameters for the trained model 
+    - masks
+        - `mask1.png` 
+        - `mask2.png`
+    - Training_Results  
+        -YOLO11
+            - `results.csv` Results of the training on the YOLO11 model
+            - `results.png` Visulization of the training statistics on the YOLO11 model
+            - `YOLO11.ipynb` Jupyter Notebook containing the training code
+            - `best.pt`  Best parameters for the trained model 
+
+        -YOLOv8
+            - `results.csv` Results of the training on the YOLOV8 model
+            - `results.png` Visulization of the training statistics on the YOLO11 model
+            - `YOLOv8.ipynb` Jupyter Notebook containing the training code
+            - `best.pt`  Best parameters for the trained model 
     - `helpers.py` python module consisting of helper functions used in the three notebooks
 
-- Training_Results
-    - `results.csv` Results of the training on the YOLO11 model
-    - `results.png` Visulization of the training statistics on the YOLO11 model
-    - `YOLO11.ipynb` Jupyter Notebook containing the training code
+
+
+- TraditionalCV
+        - `traditionalcv.ipynb`  Jupyter Notebook with the Computer Vision Pipeline 
+    - images
+        - `sample_image.png`
+        - `sample_image2.png`
+    - masks
+        - `mask1.png` 
+        - `mask2.png`
+    - `helpers.py` python module consisting of helper functions used in the three notebooks
+
 
 - `app.py` Python module to demonstrate my work as a web app utilizing streamlit platform
 
 ## Dependencies
-- Python 3.9.0 [Download here](https://www.python.org/downloads/release/python-390/) (The python packages recommended are 3.9.0 <=>3.10.0 due to some of the libraries installed)
+- Python 3.13.1 [Download here](https://www.python.org/downloads/release/python-3130/)
 - Packages listed in requirements.txt 
 
 ## Learning Process
