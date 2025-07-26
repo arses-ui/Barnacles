@@ -14,6 +14,12 @@ Each pipeline is properly documented and evaluated in its respective Jupyter not
 
 Feel free to reach out with any questions or suggestions regarding this project.
 
+## Quick demo 
+
+![alt text](Demo/DALIdemo.gif)
+
+watch the demo video [here!]
+
 ## Table of Contents  
 [Installation](#installation) &nbsp;&nbsp;&nbsp;&nbsp; [Output](#output) &nbsp;&nbsp;&nbsp;&nbsp; [Files](#files) &nbsp;&nbsp;&nbsp;&nbsp; [Dependencies](#dependencies) &nbsp;&nbsp;&nbsp;&nbsp; [Conclusion](#conclusion) &nbsp;&nbsp;&nbsp;&nbsp; [Learning Process](#learning-process) &nbsp;&nbsp;&nbsp;&nbsp; [Author](#author)
 
