@@ -4,65 +4,62 @@ import os
 import requests
 import io
 import tempfile
-from inference_sdk import InferenceHTTPClient, InferenceConfiguration
 import pandas as pd
 from ultralytics import YOLO
 import numpy as np 
 from scipy.ndimage import gaussian_filter
 import cv2
 
-def crop_image_into_tiles(image, output_folder, number_of_tiles=5):
-   
-    """
+from PIL import Image
+import os
 
-    Crops an image into a collection of smaller images (tiles).
+def compute_patch_coordinates(image_size, patch_size, overlap_percentage):
+    img_width, img_height = image_size
+    patch_width, patch_height = patch_size
+    stride_x = int(patch_width * (1 - overlap_percentage))
+    stride_y = int(patch_height * (1 - overlap_percentage))
 
-    Args:
-        image_path (str): The path to the input image.
-        output_folder (str): The folder to save the cropped tiles.
-    """
-    img= None
-    if isinstance(image, Image.Image):
-        img = image
+    coords = []
+    for y in range(0, img_height - patch_height + 1, stride_y):
+        for x in range(0, img_width - patch_width + 1, stride_x):
+            coords.append((x, y, x + patch_width, y + patch_height))
 
-    elif isinstance(image, str): 
+    # Add right/bottom edge patches if needed
+    if img_width % patch_width != 0:
+        for y in range(0, img_height - patch_height + 1, stride_y):
+            coords.append((img_width - patch_width, y, img_width, y + patch_height))
+    if img_height % patch_height != 0:
+        for x in range(0, img_width - patch_width + 1, stride_x):
+            coords.append((x, img_height - patch_height, x + patch_width, img_height))
+    if (img_width % patch_width != 0) and (img_height % patch_height != 0):
+        coords.append((img_width - patch_width, img_height - patch_height, img_width, img_height))
 
-        #check of online URL
-        if image.startswith("http://") or image.startswith("https://"):
+    return coords
 
-            try:
-                response = requests.get(image)
-                response.raise_for_status() # Raise an exception for HTTP errors
-                img = Image.open(io.BytesIO(response.content))
+def extract_patches_from_coords(img, coords, output_dir, prefix):
+    os.makedirs(output_dir, exist_ok=True)
+    for i, (left, top, right, bottom) in enumerate(coords):
+        patch = img.crop((left, top, right, bottom))
+        patch.save(os.path.join(output_dir, f"{prefix}_patch_{i:04d}.png"))
 
-            except requests.exceptions.RequestException as e:
-                print(f"Error downloading image from URL: {e}")
-                return  # Return None on failure
-            except Exception as e:
-                print(f"Error processing downloaded image: {e}")
-                return  # Return None on failure
-        else:
-            # It's a local file path
-            try:
-                img = Image.open(image)
-            except FileNotFoundError:
-                print(f"Error: Image not found at {image}")
-                
-                return 
 
-    img_width, img_height = img.size
-    tile_width, tile_height = img_width//number_of_tiles, img_height//number_of_tiles
-    tile_num = 0  
 
-    for i in range(0, img_height, tile_height):
-        for j in range(0, img_width, tile_width):
-            box = (j, i, j + tile_width, i + tile_height)
-            cropped_img = img.crop(box)
-            cropped_img.save(f"{output_folder}/tile_{tile_num}.png")
-            tile_num += 1
-            
-    print("Image cropped successfully")
-    return number_of_tiles
+
+def process_images_in_folder(input_dir, patch_size=(256, 256), overlap_percentage=0.5, output_dir="output_patches"):
+    supported_exts = [".jpg", ".jpeg", ".png", ".bmp", ".tiff"]
+
+    image_files = [f for f in os.listdir(input_dir)
+                   if os.path.splitext(f)[1].lower() in supported_exts]
+
+    if not image_files:
+        print("No valid images found in input directory.")
+        return
+
+    for image_file in image_files:
+        image_path = os.path.join(input_dir, image_file)
+        divide_image_into_overlapping_patches(image_path, patch_size, overlap_percentage, output_dir)
+
+
 
 
 def image_to_base64(image_path): 
