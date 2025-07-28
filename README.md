@@ -72,20 +72,18 @@ The files for this project have been refactored into different directories for b
         - `mask1.png` 
         - `mask2.png`
     - Training_Results  
-        -YOLO11
-            - `results.csv` Results of the training on the YOLO11 model
-            - `results.png` Visulization of the training statistics on the YOLO11 model
+        -Single_stage_Finetune
+            - `COCO_dataset`
+            - `Kfold_training_barnacles` Training results from 5-fold cross validation
             - `YOLO11.ipynb` Jupyter Notebook containing the training code
-            - `best.pt`  Best parameters for the trained model 
+            - `trained-model_YOLO8v`  Best parameters for the trained model 
 
-        -YOLOv8
-            - `results.csv` Results of the training on the YOLOV8 model
-            - `results.png` Visulization of the training statistics on the YOLO11 model
-            - `YOLOv8.ipynb` Jupyter Notebook containing the training code
-            - `best.pt`  Best parameters for the trained model 
-    - `helpers.py` python module consisting of helper functions used in the three notebooks
-
-
+        -Progressive_Fintune
+            - `training_stage_1` Results of the training on the YOLOV8 model with an initial large dataset
+            - `training_stage_2` Results of the training on the trainde YOLOv8 with the second dataset
+            - `YOLO_11.ipynb` Jupyter Notebook containing the main script
+          
+- `helpers.py` python module consisting of helper functions used in the three notebooks
 
 - TraditionalCV
         - `traditionalcv.ipynb`  Jupyter Notebook with the Computer Vision Pipeline 
