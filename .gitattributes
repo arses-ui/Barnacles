@@ -1,3 +1,8 @@
 ~/Desktop/Barnacles/Trained_model?Progressive_FineTune/Kfold_training_barnacles/YOLOv8 filter=lfs diff=lfs merge=lfs -text
 ~/Desktop/Barnacles/Trained_model?Progressive_FineTune/Kfold_training_barnacles_YOLOv8 filter=lfs diff=lfs merge=lfs -text
 ~/Desktop/Barnacles/Trained_model?Progressive_FineTune/Kfold_training_barnacles_YOLOv8/ filter=lfs diff=lfs merge=lfs -text
+C:/Users/arses/Desktop/Barnacles/Trained_model/Progressive_FineTune/Kfold_training_barnacles_YOLOv8/fold_1/best.pt filter=lfs diff=lfs merge=lfs -text
+C:/Users/arses/Desktop/Barnacles/Trained_model/Progressive_FineTune/Kfold_training_barnacles_YOLOv8/fold_2/best.pt filter=lfs diff=lfs merge=lfs -text
+C:/Users/arses/Desktop/Barnacles/Trained_model/Progressive_FineTune/Kfold_training_barnacles_YOLOv8/fold_3/best.pt filter=lfs diff=lfs merge=lfs -text
+C:/Users/arses/Desktop/Barnacles/Trained_model/Progressive_FineTune/Kfold_training_barnacles_YOLOv8/fold_4/best.pt filter=lfs diff=lfs merge=lfs -text
+C:/Users/arses/Desktop/Barnacles/Trained_model/Progressive_FineTune/Kfold_training_barnacles_YOLOv8/fold_5/best.pt filter=lfs diff=lfs merge=lfs -text
