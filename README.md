@@ -7,9 +7,9 @@ This project is my submission for the DALI application challenge, focused on the
 The chosen pipelines were selected based on the following motivations:
 
 1. Traditional Computer Vision: To establish a baseline and explore popular rule-based methods.
-2. rained Model: To utilize deep learning’s capabilities and benchmark them against classical techniques.
+2. Fine Tuning pre-trained Model: To utilize deep learning’s capabilities and benchmark them against classical techniques.
 
-Each pipeline is properly documented and evaluated in its respective Jupyter notebook, where I tested their performance under various conditions and hyperparameter settings. These evaluations are supplemented with observations and analysis to offer a well-rounded understanding of each method's behavior.
+Each pipeline is properly documented and evaluated in its respective Jupyter notebook. These notebooks are supplemented with observations observations and analysis to offer my understandings. 
 
 Feel free to reach out with any questions or suggestions regarding this project.
 
@@ -64,56 +64,46 @@ streamlit run app.py
 
 The files for this project have been refactored into different directories for better organization. The contents of the files are as follows: 
 
-- Trained_model
-    - images
-        - `sample_image.png`
-        - `sample_image2.png`
-    - masks
-        - `mask1.png` 
-        - `mask2.png`
-    - Training_Results  
-        -Single_stage_Finetune
-            - `COCO_dataset`
-            - `Kfold_training_barnacles` Training results from 5-fold cross validation
-            - `YOLO11.ipynb` Jupyter Notebook containing the training code
-            - `trained-model_YOLO8v`  Best parameters for the trained model 
 
-        -Progressive_Fintune
-            - `training_stage_1` Results of the training on the YOLOV8 model with an initial large dataset
-            - `training_stage_2` Results of the training on the trainde YOLOv8 with the second dataset
-            - `YOLO_11.ipynb` Jupyter Notebook containing the main script
-          
-- `helpers.py` python module consisting of helper functions used in the three notebooks
-
-- TraditionalCV
-        - `traditionalcv.ipynb`  Jupyter Notebook with the Computer Vision Pipeline 
-    - images
-        - `sample_image.png`
-        - `sample_image2.png`
-    - masks
-        - `mask1.png` 
-        - `mask2.png`
-    - `helpers.py` python module consisting of helper functions used in the three notebooks
-
-
-- `app.py` Python module to demonstrate my work as a web app utilizing streamlit platform
-
-## Dependencies
-- Python 3.13.1 [Download here](https://www.python.org/downloads/release/python-3130/)
-- Packages listed in requirements.txt 
-
-## Learning Process
-
-This challenge provided the perfect opportunity for me to explore and better understand classical computer vision. While I had some prior experience with image processing techniques and large multimodal models through my research work, I was relatively unfamiliar with traditional CV algorithms such as the Watershed algorithm and Connected Components labeling. Working on this project allowed me to engage with these techniques hands-on.
-
-Additionally, I used this challenge as a chance to experiment with different large models before ultimately selecting YOLOv11 for further training. This growing familiarity with both classical CV methods and state-of-the-art vision models is something I look forward to applying in future projects, both at DALI and in other settings.
+```
+├── __pycache__
+├── app.py
+├── Demo
+├── README.md
+├── TraditionalCV
+│   ├── images
+│   │   ├── sample_image.png
+│   │   └── sample_image2.png
+│   ├── masks
+│   │   ├── mask1.png
+│   │   └── mask2.png
+│   └── traditionalcv.ipynb
+└── Trained_model
+    ├── COCO_dataset
+    ├── helpers.py
+    ├── image_patches
+    ├── images
+    ├── mask_patches
+    ├── masks
+    ├── Progressive_FineTune
+    │   ├── Kfold_training_barnacles_PFT
+    │   ├── trained-model_YOLOv8_PFT.ipynb
+    │   ├── training_stage_1
+    │   └── training_stage_2
+    ├── README.md
+    ├── Single_step_Finetune
+    │   ├── Kfold_training_barnacles_SFT
+    │   └── trained-model_YOLO8v_SFT.ipynb
+    ├── unseen_images
+    └── yolo_dataset          
+```
 
 
 ## Conclusion
 
-Among the three approaches tested, the trained model demonstrated the most promise. Although it was trained on a relatively small dataset, it was able to accurately count the number of barnacles in images, particularly when the number of objects was limited. In contrast, the traditional image processing method performed poorer than expected, offering little adaptability and requiring  manual tuning of parameters to work for each individual image.
+Among the three approaches tested, the trained model demonstrated the most promise. Although it was trained on a relatively small dataset, it was able to  count the number of barnacles in images pretty well, particularly when the number of objects was limited. In contrast, the traditional image processing method performed poorer than expected, offering little adaptability and requiring  manual tuning of parameters to work for each individual image.
 
-For future work, I believe the best direction is to curate a larger dataset and fine-tune a pre-trained object detection model such as YOLOv11. Although the data preparation process may be time-consuming, this approach would allow the model to generalize better across various image conditions and barnacle types, ultimately leading to more robust and scalable performance.
+For future work, I believe the best direction is to curate a larger dataset and fine-tune a pre-trained object detection model such as YOLOv11. Another approach that can be taken is progressive fine-tuning (what I do ) and training a model on datasets that closely resemble the tasks you want to perform before training it on your own dataset.
 
 ## Author
 Arses Prasai -[Github](https://github.com/arses-ui)         

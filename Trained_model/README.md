@@ -71,40 +71,25 @@ pip install -r requirements.txt
 
 The files for this project have been refactored into different directories for better organization. The contents of the files are as follows: 
 
-
-Trained-model<br>
-│<>
-├── Progressive_FineTune/
-│   ├── Kfold_training_barnacles_PFT/
-│   ├── training_stage_1/
-│   ├── training_stage_2/
-│   └── trained-model_YOLOv8_PFT.ipynb
-│
-├── Single_step_FineTune/
-│   ├── Kfold_training_barnacles_SFT/
-│   └── trained-model_YOLOv8_SFT.ipynb
-│
-├── TraditionalCV/
-│   ├── traditionalcv.ipynb
-│   ├── images/
-│   │   ├── sample_image.png
-│   │   └── sample_image2.png
-│   ├── masks/
-│   │   ├── mask1.png
-│   │   └── mask2.png
-│   └── helpers.py
-│
-├── image_patches/           # Cropped image tiles
-├── mask_patches/            # Corresponding mask tiles
-├── COCO_dataset/            # Data in COCO format
-├── yolo_dataset/            # YOLO-formatted dataset
-├── unseen_images/           # For inference
-├── helpers.py               # Shared utility functions
-├── app.py                   # Streamlit demo app
-└── requirements.txt
-s
-
-- `app.py` Python module to demonstrate my work as a web app utilizing streamlit platform
+```
+├── COCO_dataset
+├── helpers.py
+├── image_patches
+├── images
+├── mask_patches
+├── masks
+├── Progressive_FineTune
+│   ├── Kfold_training_barnacles_PFT
+│   ├── trained-model_YOLOv8_PFT.ipynb
+│   ├── training_stage_1
+│   └── training_stage_2
+├── README.md
+├── Single_step_Finetune
+│   ├── Kfold_training_barnacles_SFT
+│   └── trained-model_YOLO8v_SFT.ipynb
+├── unseen_images
+└── yolo_dataset          
+```
 
 ## Dependencies
 - Python 3.13.1 [Download here](https://www.python.org/downloads/release/python-3130/)
