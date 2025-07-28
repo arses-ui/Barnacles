@@ -13,6 +13,7 @@ import cv2
 from PIL import Image
 import os
 
+
 def compute_patch_coordinates(image_size, patch_size, overlap_percentage):
     img_width, img_height = image_size
     patch_width, patch_height = patch_size
@@ -36,28 +37,14 @@ def compute_patch_coordinates(image_size, patch_size, overlap_percentage):
 
     return coords
 
+
+
 def extract_patches_from_coords(img, coords, output_dir, prefix):
     os.makedirs(output_dir, exist_ok=True)
     for i, (left, top, right, bottom) in enumerate(coords):
         patch = img.crop((left, top, right, bottom))
         patch.save(os.path.join(output_dir, f"{prefix}_patch_{i:04d}.png"))
 
-
-
-
-def process_images_in_folder(input_dir, patch_size=(256, 256), overlap_percentage=0.5, output_dir="output_patches"):
-    supported_exts = [".jpg", ".jpeg", ".png", ".bmp", ".tiff"]
-
-    image_files = [f for f in os.listdir(input_dir)
-                   if os.path.splitext(f)[1].lower() in supported_exts]
-
-    if not image_files:
-        print("No valid images found in input directory.")
-        return
-
-    for image_file in image_files:
-        image_path = os.path.join(input_dir, image_file)
-        divide_image_into_overlapping_patches(image_path, patch_size, overlap_percentage, output_dir)
 
 
 
