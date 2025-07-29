@@ -3,7 +3,7 @@
 # Introduction
 <font size=4>
 
-My DALI application challenge project focuses on detecting and counting barnacles in images. To find the most effective approach, I developed and evaluated two distinct methodologies: a pipeline built on traditional computer vision techniques and another using fine-tuned deep learning models, specifically YOLOv11.
+My DALI application challenge project focuses on detecting and counting barnacles in images. To find the most effective approach, I developed and evaluated two distinct methodologies: a pipeline built on traditional computer vision techniques and another using fine-tuned deep learning models, specifically YOLOv8.
 
 This comparative study aims to not only identify the superior solution but also to illuminate the strengths and limitations of classical rule-based methods versus modern deep learning architectures. Each pipeline's development and evaluation, complete with observations and analysis, are thoroughly documented in dedicated Jupyter notebooks. An additional README in the `Finetune_model` subdirectory details my learning journey with the deep learning models.
 
@@ -62,7 +62,7 @@ The files for this project have been refactored into different directories for b
 
 
 ```
-├── __pycache__
+
 ├── app.py
 ├── Demo
 ├── README.md
@@ -83,12 +83,14 @@ The files for this project have been refactored into different directories for b
     ├── masks
     ├── Progressive_FineTune
     │   ├── Kfold_training_barnacles_PFT
+    │   ├── Kfoldtraining_PFT.ipynb
     │   ├── trained-model_YOLOv8_PFT.ipynb
     │   ├── training_stage_1
     │   └── training_stage_2
     ├── README.md
     ├── Single_step_Finetune
     │   ├── Kfold_training_barnacles_SFT
+        │   ├── Kfoldtraining_SFT.ipynb
     │   └── trained-model_YOLO8v_SFT.ipynb
     ├── unseen_images
     └── yolo_dataset          
@@ -111,4 +113,3 @@ Overall, I had a great learning experience through this challenge, and I would l
 ## Author
 Arses Prasai -[Github](https://github.com/arses-ui)         
 Email : arses.prasai.28@dartmouth.edu                 
-

@@ -126,245 +126,6 @@ def intro():
 
 
 
-
-
-
-def Trained_model(): 
-
-    import streamlit as st 
-    from PIL import Image
-    import tempfile 
-    import shutil 
-
-
-    st.set_page_config(page_title= "Models", page_icon = '🖥️' )
-    
-
-
-     #function to change the background color 
-    def set_bg_url():
-        '''
-        A function to unpack an image from url and set as bg.
-        Returns
-        -------
-        The background.
-        '''
-            
-        st.markdown(
-            f"""
-            <style>
-            .stApp {{
-                background: url("https://images.pexels.com/photos/1166644/pexels-photo-1166644.jpeg?_gl=1*nzqsrx*_ga*MTk5NDcyOTMxMC4xNzUzMjM1MTcx*_ga_8JE65Q40S6*czE3NTMyMzUxNzEkbzEkZzEkdDE3NTMyMzUyNjEkajMwJGwwJGgw");
-                background-size: cover
-            }}
-            </style>
-            """,
-            unsafe_allow_html=True
-        )
-    
-    set_bg_url()
-
-
-    st.markdown("""
-    <style>
-    /* Existing button styles */
-    div.stButton > button:first-child {
-        background-color: #007bff; /* Blue */
-        color: white;
-        border-radius: 5px;
-        border: none;
-        padding: 10px 20px;
-        font-size: 16px;
-    }
-    div.stButton > button:hover {
-        background-color: #0056b3; /* Darker blue on hover */
-    }
-
-    /* New Bounding Box Style */
-    .bounding-box {
-        border: 2px solid #4CAF50; /* Green border */
-        border-radius: 10px; /* Rounded corners */
-        padding: 20px; /* Space inside the box */
-        margin-bottom: 20px; /* Space below the box */
-        background-color: #f0fff0; /* Light green background */
-        box-shadow: 3px 3px 8px rgba(0, 0, 0, 0.1); /* Subtle shadow */
-    }
-
-    /* Style for text inside the bounding box, if desired */
-    .bounding-box p {
-        font-size: 1.1em;
-        line-height: 1.6;
-        color: #333;
-    }
-
-    </style>
-    """, unsafe_allow_html=True) 
-
-
-    st.markdown("""<div class="bounding-box">
-                <span style="color:black"> 
-            <h1>Deep Learning Models
-                </h1>
-                </span>
-                </div>
-        """, unsafe_allow_html=True)
-    
-
-    st.markdown(f"""
-    <div class="bounding-box">
-        <p>
-        In this page, I try to solve the problem with the assistance of two tools. First is a YOLO model that had been pre-trained on 
-        detecting barnacles. Second is a YOLO11s model that I trained on my own using datasets I found in <a href="https://universe.roboflow.com/stephen-7b2qu/barnacles-lnd34/model/1" target="_blank">Roboflow Universe.</a>
-    </p>
-
-       
-    </div>
-    """, unsafe_allow_html=True)
-
-
-    st.markdown(f"""
-    <div class="bounding-box">
-                <p>
-    The dataset I used to train my own model contained relatively few barnacles per image, similar to the dataset used to train the pre-trained model 
-                I access through an API. As a result, both models struggled to accurately detect barnacles in images with a large number of them. To
-                 address this limitation, I introduced an additional step in my approach: breaking each input image into approximately 30 smaller 
-                tiles and running inference on each tile individually.
-                </p>
-                </div>  
-        """, unsafe_allow_html=True)
-    
-    image_url_input= ""
-
-    result = f'<p style="font-family:sans-serif; color:Green; font-size: 20px;">Entire the Image URL</p>'
-    st.markdown(result, unsafe_allow_html=True)
-    image_url_input = st.text_input("")
-    
-
-    @st.cache_data(show_spinner=False) # Underscore for _image_for_processing not needed if it's hashable
-    def run_barnacle_analysis_api(image_for_processing_bytes_or_url:str): # This argument must be hashable
-        """
-        Performs the full barnacle analysis pipeline:
-        1. Converts input (bytes or URL) to PIL Image.
-        2. Crops the image into tiles and saves them.
-        3. Runs inference on each tile using the Roboflow client.
-        Returns total barnacles detected and a status message.
-        """
-        number_of_barnacles = 0
-        model = YOLO('scripts/best.pt')
-
-        
-        numbers_2 =[]
-        for i in range(5): 
-            model=  AutoDetectionModel.from_pretrained(
-                model_type = "yolov8", 
-                model_path = f'Finetune_model/Single_step_Finetune/KFold_training_barnacles_SFT/fold_{i+1}/best.pt', 
-                confidence_threshold=0.5, 
-                device ="cpu")
-            result = sahi_inference("../unseen_images/unseen_img2.png", model)
-            object_predictionlist = result.object_prediction_list
-            number = len(object_predictionlist)
-            numbers_2.append(number)
-    
-        return number_of_barnacles, "Success"
-    
-
-    def run_barnacle_analysis_trained(image_for_processing_bytes_or_url:str): # This argument must be hashable
-        """
-        Performs the full barnacle analysis pipeline:
-        1. Converts input (bytes or URL) to PIL Image.
-        2. Crops the image into tiles and saves them.
-        3. Runs inference on each tile using the Roboflow client.
-        Returns total barnacles detected and a status message.
-        """
-
-        #3. Barnacle Inference Loop
-        number_of_barnacles = 0
-        model = YOLO('scripts/best.pt')
-        numbers_2 =[]
-        for i in range(5): 
-        model=  AutoDetectionModel.from_pretrained(
-            model_type = "yolov8", 
-            model_path = f'Finetune_model/Single_step_Finetune/KFold_training_barnacles_SFT/fold_{i+1}/best.pt', 
-            confidence_threshold=0.5, 
-            device ="cpu")
-        result = sahi_inference("../unseen_images/unseen_img2.png", model)
-        object_predictionlist = result.object_prediction_list
-        number = len(object_predictionlist)
-        numbers_2.append(number)
-    
-
-
-        
-
-        return number_of_barnacles, "Success"
-
-
-    #Trigger for the Analysis to start 
-    analysis_triggered = st.button("Start Barnacle Analysis")
-    if analysis_triggered:
-        # Prepare the input for the cached function to be hashable
-        hashable_input = None
-
-        if img_file_buffer is not None:
-            # Read the bytes from the UploadedFile. This makes it hashable.
-            # Use seek(0) to ensure the buffer is read from the beginning in case it was already read (e.g., by st.image above).
-            img_file_buffer.seek(0)
-            hashable_input = img_file_buffer.read()
-
-
-        elif image_url_input:
-            # URL string is already hashable
-            hashable_input = image_url_input
-
-        if hashable_input is None:
-            st.markdown(
-                    """
-                        <p style="color:red; font-weight:bold;">Error! Please enter a valid image or URL address</p>
-                        """,
-                     unsafe_allow_html=True
-                        )
-
-
-        else:
-            if option == 'API model':
-                with st.spinner(""):
-                    total_barnacles, status = run_barnacle_analysis_api(hashable_input)
-
-            elif option  == 'Trained Model':
-                with st.spinner(""):
-                    total_barnacles, status = run_barnacle_analysis_trained(hashable_input)
-            else: 
-                st.error(f"Please select a training model")
-                status = "No model selected"
-
-            if status == "Success":
-                result = f'<p style="font-family:sans-serif; color:Black; font-size: 42px;">Total Number of Barnacles:{total_barnacles}</p>'
-                st.markdown(result, unsafe_allow_html=True)
-                st.markdown("""
-                        <p style="color:green;font-size:20px; font-weight:bold;">✅ Analysis complete!</p>
-                        """,
-                     unsafe_allow_html=True
-                        )
-            else:
-                st.markdown(
-                    f"""
-                        <p style="color:red; font-weight:bold;">Error! {status}</p>
-                        """,
-                     unsafe_allow_html=True
-                        )
-
-    try: 
-        shutil.rmtree(output_directory)
-    except Exception as e: 
-        st.markdown(
-                    f"""
-                        <p style="color:red; font-weight:bold;">Error cleaning up the temporary directory: {e}</p>
-                        """,
-                     unsafe_allow_html=True
-        )
-
-
-
 def Computer_vision(): 
     import numpy as np
     import cv2
@@ -449,7 +210,7 @@ def Computer_vision():
     <div class="bounding-box">
         <p>
         On this page, I present my approach to tackling the challenge using traditional computer vision and image processing techniques. 
-        I chose this direction out of both curiosity and a desire to explore classical methods. This approach involves a sequence of operations, 
+        I chose this direction out of both curiosity and a desire to explore different computer vision methods. This approach involves a sequence of operations, 
         including filtering, binarization, morphological transformations, and contour detection. I utilize well-known techniques such as Otsu’s 
         thresholding for binarization and the Watershed algorithm for segmentation. By identifying and counting distinct contour objects, the number 
         of barnacles in the image is estimated.
@@ -564,7 +325,7 @@ def Computer_vision():
         )
         
         # noise removal
-        kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (3, 3))
+        kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (5, 5))
         cleaned_image = cv2.morphologyEx(image_after_otsu, 
                                 cv2.MORPH_OPEN,
                                 kernel,
@@ -586,17 +347,15 @@ def Computer_vision():
         unknown = cv2.subtract(sure_bg, sure_fg)
 
         # Marker labelling
-        # sure foreground 
         ret, markers = cv2.connectedComponents(sure_fg)
 
-        # Add one to all labels so that background is not 0, but 1
         markers += 1
-        # mark the region of unknown with zero
         markers[unknown == 255] = 0
 
         # watershed Algorithm
         img_array = np.array(image).astype(np.uint8)
-        markers = cv2.watershed(img_array, markers)
+        gaussian = gaussian_filter(img_array, sigma =1)
+        markers = cv2.watershed(gaussian, markers)
         fig, ax = plt.subplots(figsize=(5, 5))
         
 
@@ -604,26 +363,23 @@ def Computer_vision():
         coins = []
         for label in labels[2:]:  
 
-        # Create a binary image in which only the area of the label is in the foreground 
-        #and the rest of the image is in the background   
+      
             target = np.where(markers == label, 255, 0).astype(np.uint8)
         
-        # Perform contour extraction on the created binary image
             contours, hierarchy = cv2.findContours(
                 target, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE
             )
             coins.append(contours[0])
 
-        # Draw the outline
         contour_image = cv2.drawContours(image_array, coins, -1, color=(255, 255, 255), thickness=2)
         plt.imshow(image, cmap ='grey')
         return  len(coins), "Success", contour_image
     
 
-    
-    #Trigger for the Analysis to start 
+    #trigger for analysis to start
     analysis_triggered = st.button("Start Barnacle Analysis")
     if analysis_triggered:
+
         # Prepare the input for the cached function to be hashable
         hashable_input = None
 
@@ -679,9 +435,7 @@ def Computer_vision():
 
 page_names_to_funcs= {
 "Welcome Page":intro, 
-"Approach 1: Traditional CV": Computer_vision,
-"Approach 2: Training model": Trained_model
-
+"Computer Vision": Computer_vision,
 }
 
 project_name = st.sidebar.selectbox("Choose a project", page_names_to_funcs.keys())
