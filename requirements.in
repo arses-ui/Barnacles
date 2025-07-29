@@ -1,0 +1,10 @@
+numpy 
+pandas
+fiftyone
+ultralytics
+sahi
+ipywidgets
+matplotlib
+Pillow
+tqdm
+opencv-python

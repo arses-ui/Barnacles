@@ -32,7 +32,7 @@ YOLO (You Only Look Once) is a State of the Art algorithms for object detection 
 
 1. **Lightweight:** Smaller models (~12M parameters) enable faster training and inference.
 2. **Versatile:** Supports both object detection and segmentation.
-3. **Integrated Ecosystem:** Ultralytics makes it use to work with libraries like SAHI and various data formats.
+3. **Integrated Ecosystem:** Ultralytics makes it easy to work with libraries like SAHI and various data formats.
 
 
 ## File Structure
@@ -48,13 +48,15 @@ The files for this project have been refactored into different directories for b
 ├── masks
 ├── Progressive_FineTune
 │   ├── Kfold_training_barnacles_PFT
-│   ├── trained-model_YOLOv8_PFT.ipynb
+│   ├── trained-model_YOLOv8_PFT.ipynb (main notebook )
+│   ├── Kfoldtraining_PFT.ipynb  (colab notebook for training)
 │   ├── training_stage_1
 │   └── training_stage_2
 ├── README.md
 ├── Single_step_Finetune
-│   ├── Kfold_training_barnacles_SFT
-│   └── trained-model_YOLO8v_SFT.ipynb
+│   ├── Kfold_training_barnacles_SFT 
+│   ├── Kfoldtraining_SFT.ipynb  (colab notebook for training)
+│   └── trained-model_YOLO8v_SFT.ipynb (main notebook)
 ├── unseen_images
 └── yolo_dataset          
 ```

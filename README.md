@@ -65,6 +65,7 @@ The files for this project have been refactored into different directories for b
 
 ├── app.py
 ├── Demo
+├── requirements.txt
 ├── README.md
 ├── CV_model
 │   ├── images
@@ -83,15 +84,15 @@ The files for this project have been refactored into different directories for b
     ├── masks
     ├── Progressive_FineTune
     │   ├── Kfold_training_barnacles_PFT
-    │   ├── Kfoldtraining_PFT.ipynb
-    │   ├── trained-model_YOLOv8_PFT.ipynb
+    │   ├── Kfoldtraining_PFT.ipynb  (colab notebook for training)
+    │   ├── trained-model_YOLOv8_PFT.ipynb  (main notebook)
     │   ├── training_stage_1
     │   └── training_stage_2
     ├── README.md
     ├── Single_step_Finetune
     │   ├── Kfold_training_barnacles_SFT
-        │   ├── Kfoldtraining_SFT.ipynb
-    │   └── trained-model_YOLO8v_SFT.ipynb
+    │   ├── Kfoldtraining_SFT.ipynb  (colab notebook for training)
+    │   └── trained-model_YOLO8v_SFT.ipynb (main notebook)
     ├── unseen_images
     └── yolo_dataset          
 ```
