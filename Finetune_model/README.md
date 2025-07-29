@@ -34,38 +34,6 @@ YOLO (You Only Look Once) is a State of the Art algorithms for object detection 
 2. **Versatile:** Supports both object detection and segmentation.
 3. **Integrated Ecosystem:** Ultralytics makes it use to work with libraries like SAHI and various data formats.
 
-## Installation
-1. Clone the repository:
-```bash
-git clone https://github.com/arses-ui/Barnacles.git
-cd your-repository-name
-```
-
-2. Install virtual env to specify the python version
-```bash 
-pip install virtualenv
-```
-
-4. Create and activate a virtual environment:
-```bash
-virtualenv --python=c:/path/to/your/python3.9/python.exe venv
-a. source venv/Scripts/activate # For Windows + Git Bash or WSL
-b. venv\Scripts\activate #For Windows Command Prompt 
-c. venv/bin/activate #For Mac/Linux
-```
-
-5.Install ipykernel <br>
-If you want to run the jupyter notebooks and reproduce the results, install ipykernel using pip . 
-
-```bash 
-pip install ipykernel 
-python -m ipykernel install --user --name=venv --display_name="Barnacles" 
-```
-
-6. Install requried packages:
-```bash
-pip install -r requirements.txt 
- ```
 
 ## File Structure
 

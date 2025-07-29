@@ -2,25 +2,21 @@
 
 # Introduction
 <font size=4>
-This project is my submission for the DALI application challenge, focused on the  detection and counting of barnacles in images. Motivated by a desire to compare different methodologies, I developed and evaluated three distinct pipelines: traditional computer vision techniques, a custom-trained deep learning model (YOLOv11), and an approach leveraging an external API. This comparative study not only aims to identify the most effective solution, but also to highlight the strengths and limitations of classical rule-based methods versus modern deep learning architectures like YOLOv11.
 
-The chosen pipelines were selected based on the following motivations:
+My DALI application challenge project focuses on detecting and counting barnacles in images. To find the most effective approach, I developed and evaluated two distinct methodologies: a pipeline built on traditional computer vision techniques and another using fine-tuned deep learning models, specifically YOLOv11.
 
-1. Traditional Computer Vision: To establish a baseline and explore popular rule-based methods.
-2. Fine Tuning pre-trained Model: To utilize deep learning’s capabilities and benchmark them against classical techniques.
+This comparative study aims to not only identify the superior solution but also to illuminate the strengths and limitations of classical rule-based methods versus modern deep learning architectures. Each pipeline's development and evaluation, complete with observations and analysis, are thoroughly documented in dedicated Jupyter notebooks. An additional README in the `Finetune_model` subdirectory details my learning journey with the deep learning models.
 
-Each pipeline is properly documented and evaluated in its respective Jupyter notebook. These notebooks are supplemented with observations observations and analysis to offer my understandings. 
-
-Feel free to reach out with any questions or suggestions regarding this project.
+I'm eager for any questions or suggestions you might have about this project.
 
 ## Quick demo 
 
 ![alt text](Demo/DALIdemo.gif)
 
-watch the demo video [here!]
+P.S The app isn't as informative or telling as the notebooks. I would suggest reading the notebooks to learn more about the project.
 
 ## Table of Contents  
-[Installation](#installation) &nbsp;&nbsp;&nbsp;&nbsp; [Output](#output) &nbsp;&nbsp;&nbsp;&nbsp; [Files](#files) &nbsp;&nbsp;&nbsp;&nbsp; [Dependencies](#dependencies) &nbsp;&nbsp;&nbsp;&nbsp; [Conclusion](#conclusion) &nbsp;&nbsp;&nbsp;&nbsp; [Learning Process](#learning-process) &nbsp;&nbsp;&nbsp;&nbsp; [Author](#author)
+[Installation](#installation) &nbsp;&nbsp;&nbsp;&nbsp;  [Files](#files) &nbsp;&nbsp;&nbsp;&nbsp; [Dependencies](#dependencies) &nbsp;&nbsp;&nbsp;&nbsp; [Conclusion](#conclusion) &nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp; [Author](#author)
 
 
 ## Installation
@@ -70,7 +66,7 @@ The files for this project have been refactored into different directories for b
 ├── app.py
 ├── Demo
 ├── README.md
-├── TraditionalCV
+├── CV_model
 │   ├── images
 │   │   ├── sample_image.png
 │   │   └── sample_image2.png
@@ -78,7 +74,7 @@ The files for this project have been refactored into different directories for b
 │   │   ├── mask1.png
 │   │   └── mask2.png
 │   └── traditionalcv.ipynb
-└── Trained_model
+└── Finetune_model
     ├── COCO_dataset
     ├── helpers.py
     ├── image_patches
@@ -98,12 +94,19 @@ The files for this project have been refactored into different directories for b
     └── yolo_dataset          
 ```
 
+## Dependencies
+- Python 3.13.1 [Download here](https://www.python.org/downloads/release/python-3130/)
+- Packages listed in requirements.txt 
+
 
 ## Conclusion
 
-Among the three approaches tested, the trained model demonstrated the most promise. Although it was trained on a relatively small dataset, it was able to  count the number of barnacles in images pretty well, particularly when the number of objects was limited. In contrast, the traditional image processing method performed poorer than expected, offering little adaptability and requiring  manual tuning of parameters to work for each individual image.
+I apply three different models for this project. Among the three, the method I believe in most is multi-stage progressive finetuning method. While the pipeline using Computer Vision performs gave pretty similar results, its performance isn't very great on images where the contrast betweeen barnacles and background is low. Similarly, while the single-stage fine-tuned model performed pretty well, I believe it is grossly under-trained. The multi-stage post processing approach is not only more robust in my opinion, it is also a more transferrable approach to other situations where one might have a limited dataset. By sequentually training a model on tasks similar to what it is supposed to do before fine-tuning it on yout custom dataset, I believe there can be significant boosts to the performance. 
 
-For future work, I believe the best direction is to curate a larger dataset and fine-tune a pre-trained object detection model such as YOLOv11. Another approach that can be taken is progressive fine-tuning (what I do ) and training a model on datasets that closely resemble the tasks you want to perform before training it on your own dataset.
+## Learning Process
+
+Overall, I had a great learning experience through this challenge, and I would like to thank the DALI team for that. I not only got to play around and work with SOTA models, but I also got significant exposure and training with a variety of Classical Computer Vision algorithms and techniques. This entire journey has been a steep learning curve and I have enjoyed every bit of it. I hope to be able to utilize the skills I have learned through this challenge in the future, in DALI and beyond.
+
 
 ## Author
 Arses Prasai -[Github](https://github.com/arses-ui)         
