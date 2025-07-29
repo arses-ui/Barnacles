@@ -1,8 +1,11 @@
 import streamlit as st 
 import pandas as pd 
 import numpy as np 
-from Trained_model.helpers import *
+from Finetune_model.helpers import *
 import os 
+from ultralytics import YOLO
+from sahi import AutoDetectionModel
+from sahi.predict import get_sliced_prediction
 
 DATE_COLUMN = 'date/time'
 
@@ -230,73 +233,15 @@ def Trained_model():
                 </div>  
         """, unsafe_allow_html=True)
     
-    
-    #Displaying two widgets for inputting image or image URL
-    img_file_buffer=None
     image_url_input= ""
 
-    col1, col2 = st.columns(2)
-    with col1: 
-        result = f'<p style="font-family:sans-serif; color:Green; font-size: 20px;">Upload an image</p>'
-        st.markdown(result, unsafe_allow_html=True)
-        img_file_buffer = st.file_uploader(label= "",type=['png', 'jpg', 'jpeg'],)
-    with col2:    
-        result = f'<p style="font-family:sans-serif; color:Green; font-size: 20px;">Entire the Image URL</p>'
-        st.markdown(result, unsafe_allow_html=True)
-        image_url_input = st.text_input("")
+    result = f'<p style="font-family:sans-serif; color:Green; font-size: 20px;">Entire the Image URL</p>'
+    st.markdown(result, unsafe_allow_html=True)
+    image_url_input = st.text_input("")
     
-    output_directory = tempfile.mkdtemp()
-    st.markdown(''' <p style="font-family:sans-serif; color:Green; font-size: 20px;">Select the model you want to use</p>''', unsafe_allow_html=True)
-    option = st.selectbox(
-    '',
-    ('Trained Model', 'API model'),
-    index=None,
-    placeholder="Select contact method..."
-    )
-
-    def crop_image_into_tiles(pil_image_object, output_folder):
-        """
-        Crops a PIL Image into a collection of smaller images (tiles) and saves them.
-        Assumes pil_image_object is ALREADY a valid PIL.Image.Image object.
-        """
-        if not isinstance(pil_image_object, Image.Image):
-            print(f"Error: Expected PIL.Image.Image, but got {type(pil_image_object)}")
-            return None # Indicate failure if input type is wrong
-
-        # Ensure output folder exists
-        try:
-            os.makedirs(output_folder, exist_ok=True)
-        except PermissionError:
-            print(f"Permission denied: Unable to create or access '{output_folder}'.")
-            return None
-        except Exception as e:
-            print(f"An unexpected error occurred creating directory: {e}")
-            return None
-
-        img_width, img_height = pil_image_object.size
-        tile_width = img_width // 5
-        tile_height = img_height // 5
-        tile_num = 0
-
-        if tile_width == 0 or tile_height == 0:
-            print(f"Warning: Image {img_width}x{img_height} is too small for 1/30 tiling. No tiles will be generated.")
-            return 0
-
-        for i in range(0, img_height, tile_height):
-            for j in range(0, img_width, tile_width):
-                right = min(j + tile_width, img_width)
-                bottom = min(i + tile_height, img_height)
-                box = (j, i, right, bottom)
-                cropped_img = pil_image_object.crop(box)
-                cropped_img.save(os.path.join(output_folder, f"tile_{tile_num}.png")) # Use os.path.join
-                tile_num += 1
-
-        print(f"Image cropped successfully. Generated {tile_num} tiles in {output_folder}")
-        return tile_num
-
 
     @st.cache_data(show_spinner=False) # Underscore for _image_for_processing not needed if it's hashable
-    def run_barnacle_analysis_api(image_for_processing_bytes_or_url): # This argument must be hashable
+    def run_barnacle_analysis_api(image_for_processing_bytes_or_url:str): # This argument must be hashable
         """
         Performs the full barnacle analysis pipeline:
         1. Converts input (bytes or URL) to PIL Image.
@@ -304,112 +249,26 @@ def Trained_model():
         3. Runs inference on each tile using the Roboflow client.
         Returns total barnacles detected and a status message.
         """
-
-        #  Convert hashable input (bytes or URL) into a PIL Image object
-        pil_image_to_process = None
-        if isinstance(image_for_processing_bytes_or_url, bytes):
-            # It's bytes from an uploaded file
-            try:
-                pil_image_to_process = Image.open(io.BytesIO(image_for_processing_bytes_or_url))
-            except Exception as e:
-                st.warn(f"Error opening bytes as PIL image: {e}")
-                return None, f"Image conversion error: {e}"
-            
-        elif isinstance(image_for_processing_bytes_or_url, str):
-            
-            # It's a string, could be a URL or a local path
-            input_string = image_for_processing_bytes_or_url
-
-            # Check if it's a local file path first
-            if os.path.exists(input_string):
-                try:
-                    # Check if it's a valid image file using Pillow's verification
-                    with Image.open(input_string) as img:
-                        img.verify() # Verify if it's an image without fully loading it
-                    
-                    # If verification passes, it's a local image. Load it.
-                    pil_image_to_process = Image.open(input_string)
-                    pil_image_to_process.load() # Load image data into memory
-                    print(f"Loaded local image from path: {input_string}")
-                except FileNotFoundError:
-                    error_message = f"Local file not found: {input_string}"
-                    st.warn(error_message)
-                except (IOError, SyntaxError) as e:
-                    error_message = f"Local file is not a valid image: {e}"
-                    st.warn(error_message)
-                except Exception as e:
-                    error_message = f"An unexpected error occurred with local file: {e}"
-                    st.warn(error_message)
-            
-            # If not a local file path, check if it is a URL
-            else:
-                #URL validation
-                # For simplicity, we'll proceed assuming it's a URL if it's not a local path
-                print(f"Attempting to load as URL: {input_string}")
-                try:
-                    # Make a HEAD request first to check content type if you want to be more efficient
-                    response = requests.get(input_string, timeout=10) # Added a timeout
-                    response.raise_for_status() # Raises an HTTPError for bad responses 
-
-                    # Check content-type if you want to explicitly verify it's an image before opening
-                    content_type = response.headers.get('Content-Type', '').lower()
-                    if not content_type.startswith('image/'):
-                        error_message = f"URL content type is '{content_type}', not an image."
-                        st.warn(error_message)
-                    else:
-                        pil_image_to_process = Image.open(io.BytesIO(response.content))
-                        print(f"Loaded image from URL: {input_string}")
-
-                except requests.exceptions.RequestException as e:
-                    error_message = f"Error downloading image from URL: {e}"
-                    print(error_message) 
-                except Exception as e:
-                    error_message = f"Error processing URL content: {e}"
-                    print(error_message) 
-        
-
-        else:
-            st.warn(f"Unhandled input type for cached function: {type(image_for_processing_bytes_or_url)}")
-            return None, "Invalid input type for analysis."
-
-        if pil_image_to_process is None:
-            return 0, "Failed to load image for processing."
-
-        # Perform the cropping (tiles are saved to output_directory)
-        tiles_count = crop_image_into_tiles(pil_image_to_process, output_directory) 
-
-        if tiles_count is None or tiles_count == 0:
-            return 0, "No tiles generated or cropping failed."
-        
-        # Initializing my API Client
-        custom_configuration= InferenceConfiguration(confidence_threshold=0.2)
-        CLIENT= InferenceHTTPClient(
-        api_url ="https://serverless.roboflow.com", 
-        api_key= "CW6dMrLkiMDw9IRcbujY"
-        )
-
-        # Barnacle Inference Loop
         number_of_barnacles = 0
-        number_of_images = tiles_count
+        model = YOLO('scripts/best.pt')
 
-        for i in range(number_of_images):
-            with CLIENT.use_configuration(custom_configuration):
-                image_tile_path = os.path.join(output_directory, f"tile_{i}.png")
-                if not os.path.exists(image_tile_path):
-                    print(f"Warning: Tile {image_tile_path} not found for inference.")
-                    continue
-
-                try:
-                    result = CLIENT.infer(image_tile_path, model_id="barnacles-lnd34/1")
-                    number_of_barnacles += len(result['predictions'])
-                except Exception as e:
-                    print(f"Error during inference for tile {i}: {e}")
-                    continue
-
+        
+        numbers_2 =[]
+        for i in range(5): 
+            model=  AutoDetectionModel.from_pretrained(
+                model_type = "yolov8", 
+                model_path = f'Finetune_model/Single_step_Finetune/KFold_training_barnacles_SFT/fold_{i+1}/best.pt', 
+                confidence_threshold=0.5, 
+                device ="cpu")
+            result = sahi_inference("../unseen_images/unseen_img2.png", model)
+            object_predictionlist = result.object_prediction_list
+            number = len(object_predictionlist)
+            numbers_2.append(number)
+    
         return number_of_barnacles, "Success"
     
 
-    def run_barnacle_analysis_trained(image_for_processing_bytes_or_url): # This argument must be hashable
+    def run_barnacle_analysis_trained(image_for_processing_bytes_or_url:str): # This argument must be hashable
         """
         Performs the full barnacle analysis pipeline:
         1. Converts input (bytes or URL) to PIL Image.
@@ -418,101 +277,24 @@ def Trained_model():
         Returns total barnacles detected and a status message.
         """
 
-        # 1. Convert hashable input (bytes or URL) into a PIL Image object
-        pil_image_to_process = None
-        if isinstance(image_for_processing_bytes_or_url, bytes):
-            # It's bytes from an uploaded file
-            try:
-                pil_image_to_process = Image.open(io.BytesIO(image_for_processing_bytes_or_url))
-            except Exception as e:
-                st.warn(f"Error opening bytes as PIL image: {e}")
-                return None, f"Image conversion error: {e}"
-            
-        elif isinstance(image_for_processing_bytes_or_url, str):
-            
-            # It's a string, could be a URL or a local path
-            input_string = image_for_processing_bytes_or_url
-
-            # Check if it's a local file path first
-            if os.path.exists(input_string):
-                try:
-                    # Check if it's a valid image file using Pillow's verification
-                    with Image.open(input_string) as img:
-                        img.verify() # Verify if it's an image without fully loading it
-                    
-                    # If verification passes, it's a local image. Load it.
-                    pil_image_to_process = Image.open(input_string)
-                    pil_image_to_process.load() # Load image data into memory
-                    print(f"Loaded local image from path: {input_string}")
-                except FileNotFoundError:
-                    error_message = f"Local file not found: {input_string}"
-                    st.warn(error_message)
-                except (IOError, SyntaxError) as e:
-                    error_message = f"Local file is not a valid image: {e}"
-                    st.warn(error_message)
-                except Exception as e:
-                    error_message = f"An unexpected error occurred with local file: {e}"
-                    st.warn(error_message)
-            
-            # If not a local file path, check if it is a URL
-            else:
-                #URL validation
-                # For simplicity, we'll proceed assuming it's a URL if it's not a local path
-                print(f"Attempting to load as URL: {input_string}")
-                try:
-                    # Make a HEAD request first to check content type if you want to be more efficient
-                    response = requests.get(input_string, timeout=10) # Added a timeout
-                    response.raise_for_status() # Raises an HTTPError for bad responses 
-
-                    # Check content-type if you want to explicitly verify it's an image before opening
-                    content_type = response.headers.get('Content-Type', '').lower()
-                    if not content_type.startswith('image/'):
-                        error_message = f"URL content type is '{content_type}', not an image."
-                        st.warn(error_message)
-                    else:
-                        pil_image_to_process = Image.open(io.BytesIO(response.content))
-                        print(f"Loaded image from URL: {input_string}")
-
-                except requests.exceptions.RequestException as e:
-                    error_message = f"Error downloading image from URL: {e}"
-                    print(error_message) 
-                except Exception as e:
-                    error_message = f"Error processing URL content: {e}"
-                    print(error_message) 
-        
-        else:
-            st.warn(f"Unhandled input type for cached function: {type(image_for_processing_bytes_or_url)}")
-            return None, "Invalid input type for analysis."
-
-        if pil_image_to_process is None:
-            return 0, "Failed to load image for processing."
-
-        # 2. Perform the cropping (tiles are saved to output_directory)
-        tiles_count = crop_image_into_tiles(pil_image_to_process, output_directory) 
-
-        if tiles_count is None or tiles_count == 0:
-            return 0, "No tiles generated or cropping failed."
-
-        # 3. Barnacle Inference Loop
+        #3. Barnacle Inference Loop
         number_of_barnacles = 0
-        number_of_images = tiles_count
         model = YOLO('scripts/best.pt')
+        numbers_2 =[]
+        for i in range(5): 
+        model=  AutoDetectionModel.from_pretrained(
+            model_type = "yolov8", 
+            model_path = f'Finetune_model/Single_step_Finetune/KFold_training_barnacles_SFT/fold_{i+1}/best.pt', 
+            confidence_threshold=0.5, 
+            device ="cpu")
+        result = sahi_inference("../unseen_images/unseen_img2.png", model)
+        object_predictionlist = result.object_prediction_list
+        number = len(object_predictionlist)
+        numbers_2.append(number)
+    
 
 
-        for i in range(number_of_images):
-            image_tile_path = os.path.join(output_directory, f"tile_{i}.png")
-            if not os.path.exists(image_tile_path):
-                print(f"Warning: Tile {image_tile_path} not found for inference.")
-                continue
-
-            try: 
-                result = model(f"{output_directory}/tile_{i}.png", verbose= False)
-                count = len(result[0].boxes)
-                number_of_barnacles+= count
-
-            except Exception as e:
-                    print(f"Error during inference for tile {i}: {e}")
-                    continue
+        
 
         return number_of_barnacles, "Success"
 
