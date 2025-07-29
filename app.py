@@ -1,8 +1,7 @@
-from inference_sdk import InferenceHTTPClient, InferenceConfiguration
 import streamlit as st 
 import pandas as pd 
 import numpy as np 
-from scripts.helpers import *
+from Trained_model.helpers import *
 import os 
 
 DATE_COLUMN = 'date/time'
@@ -162,7 +161,6 @@ def Trained_model():
     
     set_bg_url()
 
-    
 
     st.markdown("""
     <style>

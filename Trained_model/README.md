@@ -26,9 +26,9 @@ While YOLOv8 excels at object detection via bounding boxes, its smaller variants
 - **Final Stage:** Fine-tuned on the cropped barnacle patches.
 
 
-## Why YOLOv8
+## Why YOLO
 
-YOLO (You Only Look Once) models by Ultralytics are high-performing models for object detection and segmentation. I chose YOLOv8 for the following reasons:
+YOLO (You Only Look Once) is a State of the Art algorithms for object detection as well as localization and segmentation. I chose YOLOv8 as my model of choice, which runs using this algorithm, for the following reasons:
 
 1. **Lightweight:** Smaller models (~12M parameters) enable faster training and inference.
 2. **Versatile:** Supports both object detection and segmentation.
